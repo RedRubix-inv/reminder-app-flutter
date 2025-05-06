@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:reminder_app/components/app-textarea.dart';
 import 'package:reminder_app/components/app_textfield.dart';
 import 'package:reminder_app/components/button.dart';
 import 'package:reminder_app/components/custom_appbar.dart';
+import 'package:reminder_app/components/show_toast.dart';
+import 'package:reminder_app/utils/router.dart';
 import 'package:reminder_app/utils/spacing.dart';
 import 'package:reminder_app/utils/theme.dart';
+import 'package:toastification/toastification.dart';
 
 class CreateMeetingView extends StatefulWidget {
   const CreateMeetingView({super.key});
@@ -228,6 +232,14 @@ class _CreateMeetingViewState extends State<CreateMeetingView> {
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     // TODO: Implement meeting creation
+                    showToast(
+                      context,
+                      type: ToastificationType.success,
+                      title: 'Meeting Created!',
+                      description:
+                          'Meeting ${_titleController.text} created successfully',
+                    );
+                    GoRouter.of(context).go(RouteName.home);
                   }
                 },
               ),
