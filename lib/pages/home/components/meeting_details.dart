@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:reminder_app/utils/helpers.dart';
+import 'package:reminder_app/utils/spacing.dart';
 import 'package:reminder_app/utils/theme.dart';
 
 class MeetingDetails extends StatelessWidget {
@@ -78,31 +79,31 @@ class MeetingDetails extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const VerticalSpace(16),
           _buildInfoRow(
             icon: Icons.calendar_today,
             title: 'Date & Time',
             content: formatDateTime(dateTime),
           ),
-          const SizedBox(height: 16),
+          const VerticalSpace(16),
           _buildInfoRow(
             icon: Icons.timer,
             title: 'Time Remaining',
             content: getRemainingTime(dateTime),
           ),
-          const SizedBox(height: 16),
+          const VerticalSpace(16),
           _buildInfoRow(
             icon: Icons.person,
             title: 'Created by',
             content: createdBy,
           ),
           if (agendas != null) ...[
-            const SizedBox(height: 24),
+            const VerticalSpace(24),
             const Text(
               'Agendas & Description',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
+            const VerticalSpace(8),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -116,12 +117,12 @@ class MeetingDetails extends StatelessWidget {
             ),
           ],
           if (participants != null && participants!.isNotEmpty) ...[
-            const SizedBox(height: 24),
+            const VerticalSpace(24),
             const Text(
               'Participants',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 12),
+            const VerticalSpace(12),
             ...participants!.map(
               (email) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),

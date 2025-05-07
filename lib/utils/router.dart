@@ -2,11 +2,13 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:reminder_app/models/team.dart';
 import 'package:reminder_app/pages/auth/login/login_view.dart';
 import 'package:reminder_app/pages/auth/sign_up/sign_up_view.dart';
 import 'package:reminder_app/pages/calendar/calendar_view.dart';
 import 'package:reminder_app/pages/home/components/create_meeting_view.dart';
 import 'package:reminder_app/pages/home/home_view.dart';
+import 'package:reminder_app/pages/notification/notification_view.dart';
 import 'package:reminder_app/pages/profile/profile_view.dart';
 import 'package:reminder_app/pages/tasks/tasks_view.dart';
 import 'package:reminder_app/pages/teams_list/components/team_management.dart';
@@ -30,6 +32,7 @@ class RouteName {
   static const String profile = '/profile';
   static const String createMeeting = '/create-meeting';
   static const String teamManagement = '/team-management';
+  static const String notifications = '/notifications';
 }
 
 final router = GoRouter(
@@ -65,7 +68,14 @@ final router = GoRouter(
     GoRoute(
       path: RouteName.teamManagement,
       builder: (context, state) {
-        return const TeamManagementView();
+        final team = state.extra as Team;
+        return TeamManagementView(team: team);
+      },
+    ),
+    GoRoute(
+      path: RouteName.notifications,
+      builder: (context, state) {
+        return const NotificationView();
       },
     ),
     ShellRoute(
@@ -81,11 +91,7 @@ final router = GoRouter(
             animationCurve: Curves.easeInOutCubicEmphasized,
             index: _calculateSelectedIndex(state),
             items: const [
-              Icon(
-                LucideIcons.clipboardList,
-                size: 30,
-                color: Color.fromARGB(255, 179, 164, 164),
-              ),
+              Icon(LucideIcons.clipboardList, size: 30, color: Colors.white),
               Icon(LucideIcons.users, size: 30, color: Colors.white),
               Icon(LucideIcons.home, size: 30, color: Colors.white),
               Icon(LucideIcons.calendar, size: 30, color: Colors.white),

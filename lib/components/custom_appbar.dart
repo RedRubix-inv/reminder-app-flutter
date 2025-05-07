@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:reminder_app/components/appbar_backbutton.dart';
+import 'package:reminder_app/utils/router.dart';
 import 'package:reminder_app/utils/theme.dart';
 
 enum LeadingDisplayMode { avatarOnly, backWithText }
@@ -74,10 +76,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         centerTitle: true,
         actions: [
           if (onNotificationPressed != null)
-            IconButton(
-              icon: const Icon(LucideIcons.bell, color: textColor),
-              onPressed: onNotificationPressed,
-              iconSize: 30,
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: GestureDetector(
+                onTap: () => context.push(RouteName.notifications),
+                child: Icon(LucideIcons.bell, color: textColor, size: 30),
+              ),
             ),
         ],
         backgroundColor: Colors.transparent,

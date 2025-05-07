@@ -21,18 +21,79 @@ class _TeamsViewState extends State<TeamsView> {
       description:
           'Creating stunning visuals and user interfaces Creating stunning visuals and user interfaces Creating stunning visuals and user interfaces',
       avatarUrl: 'assets/images/profile.png',
+      memberEmails: [
+        'emma.wilson@reminderapp.com',
+        'liam.smith@reminderapp.com',
+        'olivia.brown@reminderapp.com',
+        'noah.jones@reminderapp.com',
+        'ava.davis@reminderapp.com',
+      ],
     ),
     Team(
       name: 'Development Team',
       members: 8,
       description: 'Building robust and scalable applications',
-      avatarUrl: 'assets/images/profile.png',
+      avatarUrl: 'assets/images/person1.jpg',
+      memberEmails: [
+        'james.martin@reminderapp.com',
+        'sophia.thomas@reminderapp.com',
+        'benjamin.jackson@reminderapp.com',
+        'mia.white@reminderapp.com',
+        'william.harris@reminderapp.com',
+        'isabella.moore@reminderapp.com',
+        'daniel.taylor@reminderapp.com',
+        'charlotte.anderson@reminderapp.com',
+      ],
     ),
     Team(
       name: 'Marketing Team',
       members: 4,
       description: 'Promoting our brand and engaging customers',
       avatarUrl: 'assets/images/profile.png',
+      memberEmails: [
+        'henry.lee@reminderapp.com',
+        'amelia.walker@reminderapp.com',
+        'ethan.miller@reminderapp.com',
+        'harper.thompson@reminderapp.com',
+      ],
+    ),
+    Team(
+      name: 'Product Team',
+      members: 6,
+      description: 'Defining product vision and managing roadmaps',
+      avatarUrl: 'assets/images/person1.jpg',
+      memberEmails: [
+        'lucas.roberts@reminderapp.com',
+        'evelyn.martinez@reminderapp.com',
+        'mason.hernandez@reminderapp.com',
+        'sofia.gonzalez@reminderapp.com',
+        'jack.morris@reminderapp.com',
+        'lily.rogers@reminderapp.com',
+      ],
+    ),
+    Team(
+      name: 'QA Team',
+      members: 3,
+      description: 'Ensuring product quality through rigorous testing',
+      avatarUrl: 'assets/images/profile.png',
+      memberEmails: [
+        'michael.scott@reminderapp.com',
+        'emily.evans@reminderapp.com',
+        'david.clark@reminderapp.com',
+      ],
+    ),
+    Team(
+      name: 'Support Team',
+      members: 5,
+      description: 'Providing exceptional customer support and assistance',
+      avatarUrl: 'assets/images/person1.jpg',
+      memberEmails: [
+        'chloe.king@reminderapp.com',
+        'matthew.green@reminderapp.com',
+        'grace.hall@reminderapp.com',
+        'andrew.baker@reminderapp.com',
+        'ella.carter@reminderapp.com',
+      ],
     ),
   ];
 
@@ -81,6 +142,7 @@ class _TeamsViewState extends State<TeamsView> {
                     members: emails.length + 1, // +1 for the creator
                     description: description,
                     avatarUrl: 'assets/images/profile.png',
+                    memberEmails: emails,
                   ),
                 );
               });

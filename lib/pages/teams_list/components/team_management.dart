@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:reminder_app/components/app_textfield.dart';
 import 'package:reminder_app/components/custom_appbar.dart';
+import 'package:reminder_app/models/team.dart';
 import 'package:reminder_app/utils/spacing.dart';
 import 'package:reminder_app/utils/theme.dart';
 
 class TeamManagementView extends StatefulWidget {
-  const TeamManagementView({super.key});
+  final Team team;
+
+  const TeamManagementView({super.key, required this.team});
 
   @override
   State<TeamManagementView> createState() => _TeamManagementViewState();
@@ -13,44 +16,21 @@ class TeamManagementView extends StatefulWidget {
 
 class _TeamManagementViewState extends State<TeamManagementView> {
   final _emailController = TextEditingController();
-  final List<TeamMember> _teamMembers = [
-    TeamMember(
-      email: 'john.doe@example.com',
-      name: 'John Doe',
-      role: 'Admin',
-      avatarUrl: 'assets/images/profile.png',
-    ),
-    TeamMember(
-      email: 'maharjanm9@gmail.com',
-      name: 'Manish Maharjan',
-      role: 'Moderator',
-      avatarUrl: 'assets/images/person1.jpg',
-    ),
-    TeamMember(
-      email: 'silva123@gmail.com',
-      name: 'Silva',
-      role: 'Member',
-      avatarUrl: 'assets/images/profile.png',
-    ),
-    TeamMember(
-      email: 'speedy@gmail.com',
-      name: 'Speedy',
-      role: 'Member',
-      avatarUrl: 'assets/images/person1.jpg',
-    ),
-    TeamMember(
-      email: 'sakura@gmail.com',
-      name: 'Sakura',
-      role: 'Member',
-      avatarUrl: 'assets/images/profile.png',
-    ),
-    TeamMember(
-      email: 'albert321@gmail.com',
-      name: 'Albert',
-      role: 'Member',
-      avatarUrl: 'assets/images/person1.jpg',
-    ),
-  ];
+  late List<TeamMember> _teamMembers;
+
+  @override
+  void initState() {
+    super.initState();
+    _teamMembers =
+        widget.team.memberEmails.map((email) {
+          return TeamMember(
+            email: email,
+            name: email.split('@')[0], // Using email username as name for demo
+            role: email == widget.team.memberEmails.first ? 'Admin' : 'Member',
+            avatarUrl: 'assets/images/profile.png',
+          );
+        }).toList();
+  }
 
   @override
   void dispose() {
@@ -71,7 +51,7 @@ class _TeamManagementViewState extends State<TeamManagementView> {
       backgroundColor: backgroundColor,
       appBar: CustomAppBar(
         displayMode: LeadingDisplayMode.backWithText,
-        leadingText: 'Team Management',
+        leadingText: "Team Management",
         onNotificationPressed: () {},
       ),
       body: SingleChildScrollView(
@@ -79,9 +59,75 @@ class _TeamManagementViewState extends State<TeamManagementView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundImage: AssetImage(widget.team.avatarUrl),
+                        backgroundColor: Colors.grey[200],
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.team.name,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              '${widget.team.members} members',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (widget.team.description.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Description',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      widget.team.description,
+                      style: TextStyle(color: Colors.grey[800], height: 1.5),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const VerticalSpace(24),
             const Text(
-              'Add Team',
-              style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+              'Add Team Member',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const VerticalSpace(8),
             Row(
@@ -105,7 +151,7 @@ class _TeamManagementViewState extends State<TeamManagementView> {
             ),
             const VerticalSpace(24),
             const Text(
-              'Current Team Members',
+              'Team Members',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const VerticalSpace(16),
