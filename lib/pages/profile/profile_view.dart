@@ -1,7 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:reminder_app/utils/router.dart';
 import 'package:reminder_app/utils/spacing.dart';
 import 'package:reminder_app/utils/theme.dart';
 
@@ -231,20 +229,20 @@ class ProfileView extends StatelessWidget {
                       ),
                       const VerticalSpace(30),
                       // Sign out button
-                      GestureDetector(
-                        onTap: () {
-                          GoRouter.of(context).push(RouteName.login);
-                        },
-                        child: Text(
-                          'Sign Out',
-                          style: TextStyle(
-                            color: errorColor,
-                            fontFamily: "Sora",
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
+                      // GestureDetector(
+                      //   onTap: () {
+                      //     GoRouter.of(context).push(RouteName.login);
+                      //   },
+                      //   child: Text(
+                      //     'Sign Out',
+                      //     style: TextStyle(
+                      //       color: errorColor,
+                      //       fontFamily: "Sora",
+                      //       fontSize: 18,
+                      //       fontWeight: FontWeight.w600,
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),

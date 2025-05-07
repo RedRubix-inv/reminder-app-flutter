@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:reminder_app/components/custom_appbar.dart';
-import 'package:reminder_app/components/meeting_card.dart';
+import 'package:reminder_app/components/reminder_card.dart';
+import 'package:reminder_app/pages/home/components/reminder_details_view.dart';
 import 'package:reminder_app/utils/router.dart';
 import 'package:reminder_app/utils/spacing.dart';
 import 'package:reminder_app/utils/theme.dart';
 
-class Meeting {
+class Reminder {
   final String title;
-  final DateTime dateTime;
-  final String priority;
-  final String agendas;
-  final String createdBy;
-  final List<String> participants;
-  Meeting({
+  final String description;
+  final TimeOfDay time;
+  final List<DateTime> dates;
+  final String frequency;
+
+  Reminder({
     required this.title,
-    required this.dateTime,
-    required this.priority,
-    required this.agendas,
-    required this.createdBy,
-    required this.participants,
+    required this.description,
+    required this.time,
+    required this.dates,
+    required this.frequency,
   });
 }
 
@@ -28,81 +29,52 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Meeting> meetings = [
-      Meeting(
-        title: 'Team Sync Meeting',
-        dateTime: DateTime.now().add(const Duration(days: 0)),
-        priority: 'High',
-        agendas:
-            "Weekly team sync to discuss progress and blockers. We will review the sprint goals and address any challenges faced by team members.",
-        createdBy: 'john.doe@example.com',
-        participants: [
-          'john.doe@example.com',
-          'jane.smith@example.com',
-          'alex.wilson@example.com',
-          'sarah.brown@example.com',
-          'mike.jones@example.com',
+    final List<Reminder> reminders = [
+      Reminder(
+        title: 'Team Standup',
+        description: 'Daily team sync to discuss progress and blockers',
+        time: const TimeOfDay(hour: 10, minute: 0),
+        dates: [
+          DateTime.now().add(const Duration(days: 1)),
+          DateTime.now().add(const Duration(days: 2)),
+          DateTime.now().add(const Duration(days: 3)),
         ],
+        frequency: 'Weekday (Mon-Fri)',
       ),
-      Meeting(
+      Reminder(
         title: 'Project Review',
-        dateTime: DateTime.now().add(const Duration(days: 2)),
-        priority: 'Medium',
-        agendas:
-            "Weekly team sync to discuss progress and blockers. We will review the sprint goals and address any challenges faced by team members.",
-        createdBy: 'maharjanm9@gmail.com',
-        participants: [
-          'maharjanm9@gmail.com',
-          'jane.smith@example.com',
-          'sarah.brown@example.com',
-          'mike.jones@example.com',
-          'emma.davis@example.com',
-        ],
+        description: 'Weekly project status review with stakeholders',
+        time: const TimeOfDay(hour: 14, minute: 30),
+        dates: [DateTime.now().subtract(const Duration(days: 5))],
+        frequency: 'One-time',
       ),
-      Meeting(
-        title: 'Client Presentation',
-        dateTime: DateTime.now().add(const Duration(days: 3)),
-        priority: 'High',
-        agendas:
-            "Weekly team sync to discuss progress and blockers. We will review the sprint goals and address any challenges faced by team members.",
-        createdBy: 'silva123@gmail.com',
-        participants: [
-          'silva123@gmail.com',
-          'john.doe@example.com',
-          'alex.wilson@example.com',
-          'emma.davis@example.com',
-          'liam.martin@example.com',
+      Reminder(
+        title: 'Gym Session',
+        description: 'Regular workout session',
+        time: const TimeOfDay(hour: 18, minute: 0),
+        dates: [
+          DateTime.now().subtract(const Duration(days: 1)),
+          DateTime.now().add(const Duration(days: 3)),
+          DateTime.now().add(const Duration(days: 5)),
         ],
+        frequency: 'Multiple Dates',
       ),
-      Meeting(
-        title: 'Sprint Planning',
-        dateTime: DateTime.now().add(const Duration(days: 4)),
-        priority: 'Medium',
-        agendas:
-            "Weekly team sync to discuss progress and blockers. We will review the sprint goals and address any challenges faced by team members.",
-        createdBy: 'speedy@gmail.com',
-        participants: [
-          'speedy@gmail.com',
-          'jane.smith@example.com',
-          'sarah.brown@example.com',
-          'liam.martin@example.com',
-          'olivia.white@example.com',
+      Reminder(
+        title: 'Weekend Planning',
+        description: 'Plan activities for the weekend',
+        time: const TimeOfDay(hour: 11, minute: 0),
+        dates: [
+          DateTime.now().add(const Duration(days: 6)),
+          DateTime.now().add(const Duration(days: 7)),
         ],
+        frequency: 'Weekend (Sat-Sun)',
       ),
-      Meeting(
-        title: 'Design Review',
-        dateTime: DateTime.now().add(const Duration(days: 5)),
-        priority: 'Low',
-        agendas:
-            "Weekly team sync to discuss progress and blockers. We will review the sprint goals and address any challenges faced by team members.",
-        createdBy: 'sakura@gmail.com',
-        participants: [
-          'sakura@gmail.com',
-          'mike.jones@example.com',
-          'alex.wilson@example.com',
-          'emma.davis@example.com',
-          'olivia.white@example.com',
-        ],
+      Reminder(
+        title: 'Client Call',
+        description: 'Important client meeting to discuss project requirements',
+        time: const TimeOfDay(hour: 15, minute: 0),
+        dates: [DateTime.now().add(const Duration(days: 2))],
+        frequency: 'One-time',
       ),
     ];
 
@@ -142,44 +114,63 @@ class HomeView extends StatelessWidget {
             ),
             const VerticalSpace(8),
             Text(
-              'Look at your meeting schedule.',
+              'Check your schedule and reminders.',
               style: TextStyle(fontSize: 16, color: textColorSecondary),
             ),
-            const VerticalSpace(20),
-            Text(
-              'Upcoming Meetings (${meetings.length})',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: textColor,
-              ),
+            const VerticalSpace(8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Upcoming Reminders (${reminders.length})',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
+                ),
+                const HorizontalSpace(16),
+                IconButton(
+                  onPressed: () {
+                    context.push(RouteName.createReminder);
+                  },
+                  icon: const Icon(
+                    LucideIcons.bellPlus,
+                    color: textColor,
+                    size: 30,
+                  ),
+                ),
+              ],
             ),
-            const VerticalSpace(16),
+            const VerticalSpace(8),
             Expanded(
               child: ListView.builder(
-                itemCount: meetings.length,
+                itemCount: reminders.length,
                 itemBuilder: (context, index) {
-                  final meeting = meetings[index];
+                  final reminder = reminders[index];
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: MeetingCard(
-                      title: meeting.title,
-                      dateTime: meeting.dateTime,
-                      priority: meeting.priority,
-                      agendas: meeting.agendas,
-                      createdBy: meeting.createdBy,
-                      participants: meeting.participants,
+                    child: ReminderCard(
+                      title: reminder.title,
+                      description: reminder.description,
+                      time: reminder.time,
+                      dates: reminder.dates,
+                      frequency: reminder.frequency,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => ReminderDetailsView(
+                                  title: reminder.title,
+                                  description: reminder.description,
+                                  time: reminder.time,
+                                  dates: reminder.dates,
+                                  frequency: reminder.frequency,
+                                ),
+                          ),
+                        );
+                      },
                     ),
                   );
                 },
@@ -187,13 +178,6 @@ class HomeView extends StatelessWidget {
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.push(RouteName.createMeeting);
-        },
-        backgroundColor: primaryColor,
-        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

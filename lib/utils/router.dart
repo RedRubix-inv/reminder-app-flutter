@@ -7,6 +7,7 @@ import 'package:reminder_app/pages/auth/login/login_view.dart';
 import 'package:reminder_app/pages/auth/sign_up/sign_up_view.dart';
 import 'package:reminder_app/pages/calendar/calendar_view.dart';
 import 'package:reminder_app/pages/home/components/create_meeting_view.dart';
+import 'package:reminder_app/pages/home/components/create_reminder_view.dart';
 import 'package:reminder_app/pages/home/home_view.dart';
 import 'package:reminder_app/pages/notification/notification_view.dart';
 import 'package:reminder_app/pages/profile/profile_view.dart';
@@ -31,6 +32,7 @@ class RouteName {
   static const String calendar = '/calendar';
   static const String profile = '/profile';
   static const String createMeeting = '/create-meeting';
+  static const String createReminder = '/create-reminder';
   static const String teamManagement = '/team-management';
   static const String notifications = '/notifications';
 }
@@ -78,6 +80,12 @@ final router = GoRouter(
         return const NotificationView();
       },
     ),
+    GoRoute(
+      path: RouteName.createReminder,
+      builder: (context, state) {
+        return const CreateReminderView();
+      },
+    ),
     ShellRoute(
       builder: (context, state, child) {
         return Scaffold(
@@ -93,7 +101,7 @@ final router = GoRouter(
             items: const [
               Icon(LucideIcons.clipboardList, size: 30, color: Colors.white),
               Icon(LucideIcons.users, size: 30, color: Colors.white),
-              Icon(LucideIcons.home, size: 30, color: Colors.white),
+              Icon(LucideIcons.layoutDashboard, size: 30, color: Colors.white),
               Icon(LucideIcons.calendar, size: 30, color: Colors.white),
               Icon(LucideIcons.user, size: 30, color: Colors.white),
             ],

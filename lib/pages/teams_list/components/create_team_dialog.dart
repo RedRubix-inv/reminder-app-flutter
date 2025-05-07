@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:reminder_app/components/app-textarea.dart';
+import 'package:reminder_app/components/app_textarea.dart';
 import 'package:reminder_app/components/app_textfield.dart';
 import 'package:reminder_app/components/show_toast.dart';
 import 'package:reminder_app/utils/spacing.dart';

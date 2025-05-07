@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:reminder_app/components/app-textarea.dart';
+import 'package:reminder_app/components/app_textarea.dart';
 import 'package:reminder_app/components/app_textfield.dart';
 import 'package:reminder_app/components/button.dart';
 import 'package:reminder_app/components/custom_appbar.dart';
