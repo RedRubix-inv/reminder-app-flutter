@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:reminder_app/pages/home/meeting_details_view.dart';
+import 'package:reminder_app/pages/home/components/meeting/meeting_details_view.dart';
 import 'package:reminder_app/utils/helpers.dart';
 import 'package:reminder_app/utils/theme.dart';
 

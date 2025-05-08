@@ -208,7 +208,11 @@ class ReminderDetailsView extends StatelessWidget {
                           color: primaryColor.withAlpha(50),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Icon(Icons.alarm, color: primaryColor, size: 24),
+                        child: Icon(
+                          LucideIcons.bell,
+                          color: primaryColor,
+                          size: 24,
+                        ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -250,14 +254,35 @@ class ReminderDetailsView extends StatelessWidget {
                     ],
                   ),
                   const VerticalSpace(16),
-                  Text(
-                    description,
-                    style: TextStyle(
-                      color: textColorSecondary,
-                      fontSize: 16,
-                      fontFamily: 'Sora',
-                      height: 1.5,
-                    ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: primaryColor.withAlpha(50),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          LucideIcons.alignLeft,
+                          color: primaryColor,
+                          size: 24,
+                        ),
+                      ),
+
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          description,
+                          style: TextStyle(
+                            color: textColorSecondary,
+                            fontSize: 16,
+                            fontFamily: 'Sora',
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -294,7 +319,7 @@ class ReminderDetailsView extends StatelessWidget {
                           child: Row(
                             children: [
                               Icon(
-                                Icons.access_time,
+                                LucideIcons.clock,
                                 size: 20,
                                 color: primaryColor,
                               ),
@@ -357,7 +382,7 @@ class ReminderDetailsView extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(
-                                Icons.calendar_month,
+                                LucideIcons.calendar,
                                 size: 20,
                                 color: primaryColor,
                               ),
