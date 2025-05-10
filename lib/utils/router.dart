@@ -12,8 +12,8 @@ import 'package:reminder_app/pages/home/home_view.dart';
 import 'package:reminder_app/pages/notification/notification_view.dart';
 import 'package:reminder_app/pages/profile/profile_view.dart';
 import 'package:reminder_app/pages/tasks/tasks_view.dart';
-import 'package:reminder_app/pages/teams_list/components/team_management.dart';
-import 'package:reminder_app/pages/teams_list/teams_view.dart';
+import 'package:reminder_app/pages/teams/components/team_management.dart';
+import 'package:reminder_app/pages/teams/teams_view.dart';
 import 'package:reminder_app/utils/theme.dart';
 
 import '../pages/onboarding/onboarding_state.dart';
@@ -38,7 +38,7 @@ class RouteName {
 }
 
 final router = GoRouter(
-  initialLocation: RouteName.home,
+  initialLocation: RouteName.onBoarding,
   redirect: (context, state) {
     return null;
   },
@@ -99,11 +99,11 @@ final router = GoRouter(
             animationCurve: Curves.easeInOutCubicEmphasized,
             index: _calculateSelectedIndex(state),
             items: const [
-              Icon(LucideIcons.clipboardList, size: 30, color: Colors.white),
-              Icon(LucideIcons.users, size: 30, color: Colors.white),
-              Icon(LucideIcons.layoutDashboard, size: 30, color: Colors.white),
-              Icon(LucideIcons.calendar, size: 30, color: Colors.white),
-              Icon(LucideIcons.user, size: 30, color: Colors.white),
+              Icon(LucideIcons.clipboardList, size: 28, color: Colors.white),
+              Icon(LucideIcons.users, size: 28, color: Colors.white),
+              Icon(LucideIcons.bellPlus, size: 28, color: Colors.white),
+              Icon(LucideIcons.calendar, size: 28, color: Colors.white),
+              Icon(LucideIcons.user, size: 28, color: Colors.white),
             ],
             onTap: (index) {
               _onItemTapped(index, context);

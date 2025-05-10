@@ -21,15 +21,7 @@ class _TeamManagementViewState extends State<TeamManagementView> {
   @override
   void initState() {
     super.initState();
-    _teamMembers =
-        widget.team.memberEmails.map((email) {
-          return TeamMember(
-            email: email,
-            name: email.split('@')[0], // Using email username as name for demo
-            role: email == widget.team.memberEmails.first ? 'Admin' : 'Member',
-            avatarUrl: 'assets/images/profile.png',
-          );
-        }).toList();
+    _teamMembers = List.from(widget.team.members);
   }
 
   @override
@@ -40,8 +32,46 @@ class _TeamManagementViewState extends State<TeamManagementView> {
 
   void _addTeamMember() {
     if (_emailController.text.isNotEmpty) {
-      // TODO: Implement team member invitation
+      setState(() {
+        _teamMembers.add(
+          TeamMember(
+            email: _emailController.text,
+            role: TeamRole.member,
+            name: _emailController.text.split('@')[0],
+            avatarUrl: 'assets/images/profile.png',
+          ),
+        );
+      });
       _emailController.clear();
+    }
+  }
+
+  void _removeTeamMember(TeamMember member) {
+    setState(() {
+      _teamMembers.remove(member);
+    });
+  }
+
+  void _updateMemberRole(TeamMember member, TeamRole newRole) {
+    setState(() {
+      final index = _teamMembers.indexOf(member);
+      _teamMembers[index] = TeamMember(
+        email: member.email,
+        role: newRole,
+        name: member.name,
+        avatarUrl: member.avatarUrl,
+      );
+    });
+  }
+
+  String _getRoleText(TeamRole role) {
+    switch (role) {
+      case TeamRole.admin:
+        return 'Admin';
+      case TeamRole.member:
+        return 'Member';
+      case TeamRole.viewer:
+        return 'Viewer';
     }
   }
 
@@ -95,7 +125,7 @@ class _TeamManagementViewState extends State<TeamManagementView> {
                               ),
                             ),
                             Text(
-                              '${widget.team.members} members',
+                              '${widget.team.memberCount} members',
                               style: TextStyle(
                                 color: Colors.grey[600],
                                 fontSize: 16,
@@ -180,11 +210,13 @@ class _TeamManagementViewState extends State<TeamManagementView> {
                       vertical: 8,
                     ),
                     leading: CircleAvatar(
-                      backgroundImage: AssetImage(member.avatarUrl),
+                      backgroundImage: AssetImage(
+                        member.avatarUrl ?? 'assets/images/profile.png',
+                      ),
                       backgroundColor: Colors.grey.shade200,
                     ),
                     title: Text(
-                      member.name,
+                      member.name ?? member.email,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Column(
@@ -192,7 +224,7 @@ class _TeamManagementViewState extends State<TeamManagementView> {
                       children: [
                         Text(member.email),
                         Text(
-                          member.role,
+                          _getRoleText(member.role),
                           style: TextStyle(
                             color: primaryColor,
                             fontWeight: FontWeight.w500,
@@ -200,11 +232,35 @@ class _TeamManagementViewState extends State<TeamManagementView> {
                         ),
                       ],
                     ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.more_vert),
-                      onPressed: () {
-                        // TODO: Show member options menu
-                      },
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        PopupMenuButton<TeamRole>(
+                          enabled: member.role != TeamRole.admin,
+                          itemBuilder:
+                              (context) =>
+                                  TeamRole.values
+                                      .where((role) => role != TeamRole.admin)
+                                      .map((role) {
+                                        return PopupMenuItem(
+                                          value: role,
+                                          child: Text(_getRoleText(role)),
+                                        );
+                                      })
+                                      .toList(),
+                          onSelected: (role) => _updateMemberRole(member, role),
+                          child: const Icon(Icons.edit, size: 20),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          onPressed:
+                              member.role == TeamRole.admin
+                                  ? null
+                                  : () => _removeTeamMember(member),
+                          icon: const Icon(Icons.delete_outline, size: 20),
+                          color: Colors.red,
+                        ),
+                      ],
                     ),
                   ),
                 );
@@ -215,18 +271,4 @@ class _TeamManagementViewState extends State<TeamManagementView> {
       ),
     );
   }
-}
-
-class TeamMember {
-  final String email;
-  final String name;
-  final String role;
-  final String avatarUrl;
-
-  TeamMember({
-    required this.email,
-    required this.name,
-    required this.role,
-    required this.avatarUrl,
-  });
 }

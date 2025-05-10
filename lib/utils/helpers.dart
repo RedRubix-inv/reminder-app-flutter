@@ -38,3 +38,42 @@ String formatDateTime(DateTime dateTime) {
       '${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
   return '$dateStr at $timeStr';
 }
+
+String formatDateToHumanReadable(DateTime date) {
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+
+  String getDaySuffix(int day) {
+    if (day >= 11 && day <= 13) {
+      return 'th';
+    }
+    switch (day % 10) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
+    }
+  }
+
+  final day = date.day;
+  final month = months[date.month - 1];
+  final year = date.year;
+
+  return '$month $day${getDaySuffix(day)}, $year';
+}

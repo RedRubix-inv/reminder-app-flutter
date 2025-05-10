@@ -14,7 +14,7 @@ ToastificationItem showToast(
     title: Text(title),
     description: Text(description),
     alignment: Alignment.topCenter,
-    autoCloseDuration: const Duration(seconds: 4),
+    autoCloseDuration: const Duration(seconds: 6),
     borderRadius: BorderRadius.circular(10),
     showProgressBar: true,
     dragToClose: true,

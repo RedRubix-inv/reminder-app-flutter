@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:reminder_app/models/notification.dart';
 import 'package:reminder_app/utils/helpers.dart';
 import 'package:reminder_app/utils/theme.dart';
@@ -38,11 +39,7 @@ class NotificationCard extends StatelessWidget {
                 color: primaryColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
-                _getIconForType(notification.type),
-                color: primaryColor,
-                size: 20,
-              ),
+              child: Icon(LucideIcons.bell, color: textColor, size: 24),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -92,18 +89,5 @@ class NotificationCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  IconData _getIconForType(String type) {
-    switch (type) {
-      case 'task':
-        return Icons.task;
-      case 'meeting':
-        return Icons.event;
-      case 'team':
-        return Icons.group;
-      default:
-        return Icons.notifications;
-    }
   }
 }

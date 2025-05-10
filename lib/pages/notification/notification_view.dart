@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:reminder_app/components/custom_appbar.dart';
+import 'package:reminder_app/components/delete_dialog/delete_dialog.dart';
+import 'package:reminder_app/components/show_toast.dart';
 import 'package:reminder_app/models/notification.dart';
 import 'package:reminder_app/pages/notification/components/notification_card.dart';
 import 'package:reminder_app/utils/spacing.dart';
 import 'package:reminder_app/utils/theme.dart';
+import 'package:toastification/toastification.dart' as toast;
 
 class NotificationView extends StatefulWidget {
   const NotificationView({super.key});
@@ -16,27 +20,69 @@ class _NotificationViewState extends State<NotificationView> {
   final List<AppNotification> _notifications = [
     AppNotification(
       id: '1',
-      title: 'New Task Assigned',
-      message: 'You have been assigned to "Design System Update" task',
-      timestamp: DateTime.now().subtract(const Duration(minutes: 30)),
-      type: 'task',
+      title: 'Daily Reminder',
+      message: 'Your daily reminder "Morning Exercise" is due in 15 minutes',
+      timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
+      type: 'reminder',
       isRead: false,
     ),
     AppNotification(
       id: '2',
-      title: 'Meeting Reminder',
-      message: 'Team sync meeting starts in 15 minutes',
-      timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-      type: 'meeting',
-      isRead: true,
+      title: 'Weekend Reminder',
+      message:
+          'Your weekend reminder "Family Dinner" is scheduled for tomorrow at 7:00 PM',
+      timestamp: DateTime.now().subtract(const Duration(hours: 1)),
+      type: 'reminder',
+      isRead: false,
     ),
     AppNotification(
       id: '3',
-      title: 'Team Update',
-      message: 'New member joined the Development Team',
-      timestamp: DateTime.now().subtract(const Duration(days: 1)),
-      type: 'team',
+      title: 'Reminder Completed',
+      message: 'You have completed "Weekly Report" reminder',
+      timestamp: DateTime.now().subtract(const Duration(hours: 3)),
+      type: 'reminder',
+      isRead: true,
+    ),
+    AppNotification(
+      id: '4',
+      title: 'Multiple Dates Reminder',
+      message: 'Your reminder "Project Review" is scheduled for next 3 days',
+      timestamp: DateTime.now().subtract(const Duration(hours: 5)),
+      type: 'reminder',
       isRead: false,
+    ),
+    AppNotification(
+      id: '5',
+      title: 'Reminder Overdue',
+      message: 'Your reminder "Call Mom" is overdue by 2 hours',
+      timestamp: DateTime.now().subtract(const Duration(hours: 8)),
+      type: 'reminder',
+      isRead: false,
+    ),
+    AppNotification(
+      id: '6',
+      title: 'Weekday Reminder',
+      message:
+          'Your weekday reminder "Team Standup" is scheduled for next 5 days',
+      timestamp: DateTime.now().subtract(const Duration(days: 1)),
+      type: 'reminder',
+      isRead: true,
+    ),
+    AppNotification(
+      id: '7',
+      title: 'Reminder Deleted',
+      message: 'Your reminder "Old Task" has been deleted',
+      timestamp: DateTime.now().subtract(const Duration(days: 1)),
+      type: 'reminder',
+      isRead: true,
+    ),
+    AppNotification(
+      id: '8',
+      title: 'Reminder Created',
+      message: 'New reminder "Weekly Planning" has been created',
+      timestamp: DateTime.now().subtract(const Duration(days: 2)),
+      type: 'reminder',
+      isRead: true,
     ),
   ];
 
@@ -57,6 +103,27 @@ class _NotificationViewState extends State<NotificationView> {
     });
   }
 
+  void _handleClearAllNotifications() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return DeleteDialog(
+          title: 'Clear All Notifications',
+          message: 'Are you sure you want to clear all notifications?',
+          deleteButtonText: 'Clear All',
+          onDelete: () {
+            showToast(
+              context,
+              type: toast.ToastificationType.success,
+              title: 'Notifications Cleared',
+              description: 'All notifications have been cleared successfully',
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,14 +140,22 @@ class _NotificationViewState extends State<NotificationView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const VerticalSpace(20),
-            Text(
-              'Recent Notifications',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: textColor,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Recent Notifications',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
+                ),
+                IconButton(
+                  onPressed: _handleClearAllNotifications,
+                  icon: Icon(LucideIcons.trash2, color: errorColor, size: 24),
+                ),
+              ],
             ),
             const VerticalSpace(16),
             Expanded(

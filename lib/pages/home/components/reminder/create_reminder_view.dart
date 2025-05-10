@@ -2,17 +2,19 @@ import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:reminder_app/components/app_textarea.dart';
 import 'package:reminder_app/components/app_textfield.dart';
 import 'package:reminder_app/components/button.dart';
 import 'package:reminder_app/components/custom_appbar.dart';
 import 'package:reminder_app/components/show_toast.dart';
+import 'package:reminder_app/utils/helpers.dart';
 import 'package:reminder_app/utils/router.dart';
 import 'package:reminder_app/utils/spacing.dart';
 import 'package:reminder_app/utils/theme.dart';
 import 'package:toastification/toastification.dart';
 
-enum ReminderFrequency { oneTime, multipleDates, weekday, weekend }
+enum ReminderFrequency { daily, oneTime, multipleDates, weekday, weekend }
 
 class CreateReminderView extends StatefulWidget {
   const CreateReminderView({super.key});
@@ -70,267 +72,212 @@ class _CreateReminderViewState extends State<CreateReminderView> {
     }
   }
 
+  Future<void> _selectDateRange(BuildContext context) async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+      initialDateRange: DateTimeRange(
+        start: _selectedDate,
+        end: _selectedDate.add(const Duration(days: 30)),
+      ),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedDates.clear();
+        DateTime current = picked.start;
+        while (!current.isAfter(picked.end)) {
+          _selectedDates.add(
+            DateTime(current.year, current.month, current.day),
+          );
+          current = current.add(const Duration(days: 1));
+        }
+      });
+    }
+  }
+
   Widget _buildDateTimeline() {
     return Theme(
       data: Theme.of(
         context,
       ).copyWith(colorScheme: ColorScheme.fromSeed(seedColor: primaryColor)),
-      child: Builder(
-        builder:
-            (context) => EasyTheme(
-              data: EasyTheme.of(context).copyWithState(
-                selectedDayTheme: DayThemeData(
-                  backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
-                  border: BorderSide(color: primaryColor),
-                  middleElementStyle: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  topElementStyle: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                unselectedDayTheme: DayThemeData(
-                  backgroundColor: Colors.white,
-                  foregroundColor: textColor,
-                  border: BorderSide(color: Colors.grey.withOpacity(0.2)),
-                  middleElementStyle: TextStyle(
-                    color: textColor,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  topElementStyle: TextStyle(
-                    color: textColorSecondary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                selectedCurrentDayTheme: DayThemeData(
-                  backgroundColor: primaryColor.withOpacity(0.8),
-                  foregroundColor: Colors.white,
-                  border: const BorderSide(color: Colors.white),
-                  middleElementStyle: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  topElementStyle: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                unselectedCurrentDayTheme: DayThemeData(
-                  backgroundColor: primaryColor.withOpacity(0.1),
-                  foregroundColor: primaryColor,
-                  border: BorderSide(color: primaryColor),
-                  middleElementStyle: TextStyle(
+      child: EasyDateTimeLinePicker.itemBuilder(
+        controller: _datePickerController,
+        selectionMode: SelectionMode.autoCenter(),
+        firstDate: DateTime.now().subtract(const Duration(days: 7)),
+        lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+        focusedDate: _selectedDate,
+        currentDate: DateTime.now(),
+        itemExtent: 64.0,
+        daySeparatorPadding: 10,
+        disableStrategy: DisableStrategy.beforeToday(),
+        locale: const Locale('en', 'US'),
+        timelineOptions: const TimelineOptions(height: 100),
+        headerOptions: HeaderOptions(
+          headerType: HeaderType.picker,
+          headerBuilder: (context, date, onTap) {
+            return InkWell(
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Text(
+                  DateFormat.yMMMM().format(date),
+                  style: TextStyle(
                     color: primaryColor,
+                    fontSize: 18,
+                    fontFamily: "Sora",
                     fontWeight: FontWeight.bold,
-                  ),
-                  topElementStyle: TextStyle(
-                    color: primaryColor,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                disabledDayTheme: DayThemeData(
-                  backgroundColor: Colors.grey.shade100,
-                  foregroundColor: Colors.grey,
-                  border: BorderSide(color: Colors.grey.withOpacity(0.2)),
-                  middleElementStyle: const TextStyle(
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  topElementStyle: const TextStyle(
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
-              child: EasyDateTimeLinePicker.itemBuilder(
-                controller: _datePickerController,
-                selectionMode: SelectionMode.autoCenter(),
-                firstDate: DateTime.now().subtract(const Duration(days: 7)),
-                lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
-                focusedDate: _selectedDate,
-                currentDate: DateTime.now(),
-                itemExtent: 64.0,
-                daySeparatorPadding: 10,
-                disableStrategy: DisableStrategy.beforeToday(),
-                locale: const Locale('en', 'US'),
-                timelineOptions: const TimelineOptions(height: 100),
-                headerOptions: HeaderOptions(
-                  headerType: HeaderType.picker,
-                  headerBuilder: (context, date, onTap) {
-                    return InkWell(
-                      onTap: onTap,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: Text(
-                          DateFormat.yMMMM().format(date),
-                          style: TextStyle(
-                            color: primaryColor,
-                            fontSize: 18,
-                            fontFamily: "Sora",
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
+            );
+          },
+        ),
+        monthYearPickerOptions: const MonthYearPickerOptions(
+          initialCalendarMode: EasyDatePickerMode.month,
+          cancelText: 'Cancel',
+          confirmText: 'Confirm',
+        ),
+        itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
+          final weekday = date.weekday;
+          bool shouldDisable = isDisabled;
+
+          // Additional weekday/weekend restrictions
+          if (!shouldDisable) {
+            switch (_selectedFrequency) {
+              case ReminderFrequency.weekday:
+                shouldDisable = weekday > 5; // Disable Sat (6) and Sun (7)
+                break;
+              case ReminderFrequency.weekend:
+                shouldDisable = weekday <= 5; // Disable Mon (1) through Fri (5)
+                break;
+              default:
+                break;
+            }
+          }
+
+          // Check if this date is selected in multiple dates mode
+          bool isDateSelected = false;
+          if (_selectedFrequency == ReminderFrequency.multipleDates ||
+              _selectedFrequency == ReminderFrequency.weekday ||
+              _selectedFrequency == ReminderFrequency.weekend ||
+              _selectedFrequency == ReminderFrequency.daily) {
+            isDateSelected = _selectedDates.any(
+              (d) =>
+                  d.year == date.year &&
+                  d.month == date.month &&
+                  d.day == date.day,
+            );
+          } else {
+            isDateSelected = isSelected;
+          }
+
+          return InkResponse(
+            onTap: shouldDisable ? null : onTap,
+            child: Container(
+              decoration: BoxDecoration(
+                color:
+                    isDateSelected
+                        ? primaryColor
+                        : isToday
+                        ? primaryColor.withOpacity(0.1)
+                        : Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color:
+                      isToday
+                          ? primaryColor
+                          : isDateSelected
+                          ? Colors.white
+                          : Colors.grey.withOpacity(0.2),
                 ),
-                monthYearPickerOptions: const MonthYearPickerOptions(
-                  initialCalendarMode: EasyDatePickerMode.month,
-                  cancelText: 'Cancel',
-                  confirmText: 'Confirm',
-                ),
-                itemBuilder: (
-                  context,
-                  date,
-                  isSelected,
-                  isDisabled,
-                  isToday,
-                  onTap,
-                ) {
-                  final weekday = date.weekday;
-                  bool shouldDisable = isDisabled;
-
-                  // Additional weekday/weekend restrictions
-                  if (!shouldDisable) {
-                    switch (_selectedFrequency) {
-                      case ReminderFrequency.weekday:
-                        shouldDisable =
-                            weekday > 5; // Disable Sat (6) and Sun (7)
-                        break;
-                      case ReminderFrequency.weekend:
-                        shouldDisable =
-                            weekday <= 5; // Disable Mon (1) through Fri (5)
-                        break;
-                      default:
-                        break;
-                    }
-                  }
-
-                  // Check if this date is selected in multiple dates mode
-                  bool isDateSelected = false;
-                  if (_selectedFrequency == ReminderFrequency.multipleDates ||
-                      _selectedFrequency == ReminderFrequency.weekday ||
-                      _selectedFrequency == ReminderFrequency.weekend) {
-                    isDateSelected = _selectedDates.any(
-                      (d) =>
-                          d.year == date.year &&
-                          d.month == date.month &&
-                          d.day == date.day,
-                    );
-                  } else {
-                    isDateSelected = isSelected;
-                  }
-
-                  return InkResponse(
-                    onTap: shouldDisable ? null : onTap,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color:
-                            isDateSelected
-                                ? primaryColor
-                                : isToday
-                                ? primaryColor.withOpacity(0.1)
-                                : Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color:
-                              isToday
-                                  ? primaryColor
-                                  : isDateSelected
-                                  ? Colors.white
-                                  : Colors.grey.withOpacity(0.2),
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            DateFormat('MMM').format(date),
-                            style: TextStyle(
-                              color:
-                                  isDateSelected
-                                      ? Colors.white
-                                      : isToday
-                                      ? primaryColor
-                                      : shouldDisable
-                                      ? Colors.grey
-                                      : textColorSecondary,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const VerticalSpace(4),
-                          Text(
-                            date.day.toString(),
-                            style: TextStyle(
-                              color:
-                                  isDateSelected
-                                      ? Colors.white
-                                      : isToday
-                                      ? primaryColor
-                                      : shouldDisable
-                                      ? Colors.grey
-                                      : textColor,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const VerticalSpace(4),
-                          Text(
-                            DateFormat('EEE').format(date),
-                            style: TextStyle(
-                              color:
-                                  isDateSelected
-                                      ? Colors.white
-                                      : isToday
-                                      ? primaryColor
-                                      : shouldDisable
-                                      ? Colors.grey
-                                      : textColorSecondary,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    DateFormat('MMM').format(date),
+                    style: TextStyle(
+                      color:
+                          isDateSelected
+                              ? Colors.white
+                              : isToday
+                              ? primaryColor
+                              : shouldDisable
+                              ? Colors.grey
+                              : textColorSecondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
                     ),
-                  );
-                },
-                onDateChange: (selectedDate) {
-                  setState(() {
-                    // Normalize selectedDate to remove time components
-                    final normalizedDate = DateTime(
-                      selectedDate.year,
-                      selectedDate.month,
-                      selectedDate.day,
-                    );
-
-                    switch (_selectedFrequency) {
-                      case ReminderFrequency.multipleDates:
-                      case ReminderFrequency.weekday:
-                      case ReminderFrequency.weekend:
-                        if (!_selectedDates.any(
-                          (d) =>
-                              d.year == normalizedDate.year &&
-                              d.month == normalizedDate.month &&
-                              d.day == normalizedDate.day,
-                        )) {
-                          _selectedDates.add(normalizedDate);
-                          _selectedDates
-                              .sort(); // Sort dates for consistent display
-                        }
-                        break;
-                      default:
-                        _selectedDate = normalizedDate;
-                        _datePickerController.animateToDate(_selectedDate);
-                    }
-                  });
-                },
+                  ),
+                  const VerticalSpace(4),
+                  Text(
+                    date.day.toString(),
+                    style: TextStyle(
+                      color:
+                          isDateSelected
+                              ? Colors.white
+                              : isToday
+                              ? primaryColor
+                              : shouldDisable
+                              ? Colors.grey
+                              : textColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const VerticalSpace(4),
+                  Text(
+                    DateFormat('EEE').format(date),
+                    style: TextStyle(
+                      color:
+                          isDateSelected
+                              ? Colors.white
+                              : isToday
+                              ? primaryColor
+                              : shouldDisable
+                              ? Colors.grey
+                              : textColorSecondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ),
+          );
+        },
+        onDateChange: (selectedDate) {
+          setState(() {
+            // Normalize selectedDate to remove time components
+            final normalizedDate = DateTime(
+              selectedDate.year,
+              selectedDate.month,
+              selectedDate.day,
+            );
+
+            switch (_selectedFrequency) {
+              case ReminderFrequency.multipleDates:
+              case ReminderFrequency.weekday:
+              case ReminderFrequency.weekend:
+              case ReminderFrequency.daily:
+                if (!_selectedDates.any(
+                  (d) =>
+                      d.year == normalizedDate.year &&
+                      d.month == normalizedDate.month &&
+                      d.day == normalizedDate.day,
+                )) {
+                  _selectedDates.add(normalizedDate);
+                  _selectedDates.sort(); // Sort dates for consistent display
+                }
+                break;
+              default:
+                _selectedDate = normalizedDate;
+                _datePickerController.animateToDate(_selectedDate);
+            }
+          });
+        },
       ),
     );
   }
@@ -348,7 +295,7 @@ class _CreateReminderViewState extends State<CreateReminderView> {
                 const Text(
                   'Selected Dates',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'Sora',
                   ),
@@ -393,10 +340,11 @@ class _CreateReminderViewState extends State<CreateReminderView> {
                         },
                         child: Chip(
                           label: Text(
-                            DateFormat('dd/MM/yyyy').format(date),
+                            formatDateToHumanReadable(date),
                             style: TextStyle(
                               color: textColor,
                               fontFamily: 'Sora',
+                              fontSize: 11,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -425,6 +373,97 @@ class _CreateReminderViewState extends State<CreateReminderView> {
             ClipRRect(child: _buildDateTimeline()),
           ],
         );
+      case ReminderFrequency.daily:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Select Date Range',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Sora',
+                  ),
+                ),
+
+                TextButton.icon(
+                  onPressed: () => _selectDateRange(context),
+                  icon: const Icon(LucideIcons.calendar, color: textColor),
+                  label: const Text(
+                    'Choose Range',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Sora',
+                      color: textColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const VerticalSpace(8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: secondaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: secondaryColor.withOpacity(0.2)),
+              ),
+              child: Row(
+                children: [
+                  Icon(LucideIcons.info, size: 16, color: secondaryColor),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Daily Reminder is initially set for 30 days automatically',
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'Sora',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const VerticalSpace(16),
+            if (_selectedDates.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: secondaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: secondaryColor.withOpacity(0.2)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(LucideIcons.calendar, size: 16, color: secondaryColor),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Daily Reminder from ${formatDateToHumanReadable(_selectedDates.first)} to ${formatDateToHumanReadable(_selectedDates.last)}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: textColor,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Sora',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            const VerticalSpace(16),
+            ClipRRect(child: _buildDateTimeline()),
+          ],
+        );
       default:
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -432,7 +471,7 @@ class _CreateReminderViewState extends State<CreateReminderView> {
             const Text(
               'Select Date',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Sora',
               ),
@@ -449,10 +488,10 @@ class _CreateReminderViewState extends State<CreateReminderView> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.calendar_today, size: 16, color: primaryColor),
+                  Icon(LucideIcons.calendar, size: 20, color: textColor),
                   const SizedBox(width: 8),
                   Text(
-                    'Selected Date: ${DateFormat('dd/MM/yyyy').format(_selectedDate)}',
+                    'Selected Date: ${formatDateToHumanReadable(_selectedDate)}',
                     style: TextStyle(
                       fontSize: 14,
                       color: textColor,
@@ -469,7 +508,7 @@ class _CreateReminderViewState extends State<CreateReminderView> {
   }
 
   void _printReminderDetails() {
-    print('=== Reminder Created ===');
+    print('\n=== Reminder Details ===');
     print('Title: ${_titleController.text}');
     print('Description: ${_descriptionController.text}');
     print('Time: ${_selectedTime.format(context)}');
@@ -477,18 +516,39 @@ class _CreateReminderViewState extends State<CreateReminderView> {
 
     switch (_selectedFrequency) {
       case ReminderFrequency.oneTime:
-        print('Date: ${DateFormat('dd/MM/yyyy').format(_selectedDate)}');
+        print('Date: ${formatDateToHumanReadable(_selectedDate)}');
         break;
       case ReminderFrequency.multipleDates:
-      case ReminderFrequency.weekday:
-      case ReminderFrequency.weekend:
-        print('Selected Dates:');
+        print('Selected Dates (${_selectedDates.length}):');
         for (var date in _selectedDates) {
-          print('  - ${DateFormat('dd/MM/yyyy').format(date)}');
+          print('  - ${formatDateToHumanReadable(date)}');
         }
         break;
+      case ReminderFrequency.weekday:
+        print('Weekday Reminder (${_selectedDates.length} days):');
+        print(
+          '  Start Date: ${formatDateToHumanReadable(_selectedDates.first)}',
+        );
+        print('  End Date: ${formatDateToHumanReadable(_selectedDates.last)}');
+        print('  Selected Days: Monday to Friday');
+        break;
+      case ReminderFrequency.weekend:
+        print('Weekend Reminder (${_selectedDates.length} days):');
+        print(
+          '  Start Date: ${formatDateToHumanReadable(_selectedDates.first)}',
+        );
+        print('  End Date: ${formatDateToHumanReadable(_selectedDates.last)}');
+        print('  Selected Days: Saturday and Sunday');
+        break;
+      case ReminderFrequency.daily:
+        print('Daily Reminder (${_selectedDates.length} days):');
+        print(
+          '  Start Date: ${formatDateToHumanReadable(_selectedDates.first)}',
+        );
+        print('  End Date: ${formatDateToHumanReadable(_selectedDates.last)}');
+        break;
     }
-    print('======================');
+    print('======================\n');
   }
 
   @override
@@ -543,10 +603,21 @@ class _CreateReminderViewState extends State<CreateReminderView> {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () => _selectTime(context),
-                      icon: const Icon(Icons.access_time),
-                      label: Text(_selectedTime.format(context)),
+
+                      icon: const Icon(LucideIcons.clock, color: textColor),
+                      label: Text(
+                        // '${_selectedTime.hour}:${_selectedTime.minute}'
+                        'Selected Time: ${_selectedTime.format(context)}',
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Sora',
+                        ),
+                      ),
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        backgroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 20),
                       ),
                     ),
                   ),
@@ -555,14 +626,24 @@ class _CreateReminderViewState extends State<CreateReminderView> {
               const VerticalSpace(16),
               DropdownButtonFormField<ReminderFrequency>(
                 value: _selectedFrequency,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Reminder Frequency',
-                  border: OutlineInputBorder(),
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: secondaryColor.withOpacity(0.2),
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  // border: OutlineInputBorder(),
                 ),
                 items:
                     ReminderFrequency.values.map((frequency) {
                       String label;
                       switch (frequency) {
+                        case ReminderFrequency.daily:
+                          label = 'Daily';
+                          break;
                         case ReminderFrequency.oneTime:
                           label = 'One-time';
                           break;
@@ -595,6 +676,15 @@ class _CreateReminderViewState extends State<CreateReminderView> {
                         case ReminderFrequency.multipleDates:
                           _selectedDate = today;
                           break;
+                        case ReminderFrequency.daily:
+                          _selectedDate = today;
+                          // Generate dates for the next 30 days
+                          _selectedDates.clear();
+                          for (int i = 0; i < 30; i++) {
+                            _selectedDates.add(today.add(Duration(days: i)));
+                          }
+
+                          break;
                         case ReminderFrequency.weekday:
                           _selectedWeekDays.fillRange(0, 5, true); // Mon-Fri
                           _selectedDate =
@@ -605,6 +695,26 @@ class _CreateReminderViewState extends State<CreateReminderView> {
                                     now.month,
                                     now.day + (8 - now.weekday),
                                   );
+                          // Generate dates for the next 30 weekdays
+                          _selectedDates.clear();
+                          DateTime weekdayDate = _selectedDate;
+                          int weekdayCount = 0;
+                          while (weekdayCount < 30) {
+                            if (weekdayDate.weekday <= 5) {
+                              // Only add weekdays (Mon-Fri)
+                              _selectedDates.add(
+                                DateTime(
+                                  weekdayDate.year,
+                                  weekdayDate.month,
+                                  weekdayDate.day,
+                                ),
+                              );
+                              weekdayCount++;
+                            }
+                            weekdayDate = weekdayDate.add(
+                              const Duration(days: 1),
+                            );
+                          }
                           break;
                         case ReminderFrequency.weekend:
                           _selectedWeekDays[5] = true; // Sat
@@ -617,6 +727,26 @@ class _CreateReminderViewState extends State<CreateReminderView> {
                                     now.month,
                                     now.day + (6 - now.weekday),
                                   );
+                          // Generate dates for the next 30 weekends
+                          _selectedDates.clear();
+                          DateTime weekendDate = _selectedDate;
+                          int weekendCount = 0;
+                          while (weekendCount < 30) {
+                            if (weekendDate.weekday >= 6) {
+                              // Only add weekends (Sat-Sun)
+                              _selectedDates.add(
+                                DateTime(
+                                  weekendDate.year,
+                                  weekendDate.month,
+                                  weekendDate.day,
+                                ),
+                              );
+                              weekendCount++;
+                            }
+                            weekendDate = weekendDate.add(
+                              const Duration(days: 1),
+                            );
+                          }
                           break;
                       }
                       _datePickerController.animateToDate(_selectedDate);
@@ -652,6 +782,7 @@ class _CreateReminderViewState extends State<CreateReminderView> {
                       case ReminderFrequency.multipleDates:
                       case ReminderFrequency.weekday:
                       case ReminderFrequency.weekend:
+                      case ReminderFrequency.daily:
                         if (_selectedDates.isEmpty) {
                           isValid = false;
                           errorMessage = 'Please select at least one date';

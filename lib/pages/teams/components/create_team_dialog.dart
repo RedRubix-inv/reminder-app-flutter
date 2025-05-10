@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:reminder_app/components/app_textarea.dart';
 import 'package:reminder_app/components/app_textfield.dart';
 import 'package:reminder_app/components/show_toast.dart';
+import 'package:reminder_app/models/team.dart';
 import 'package:reminder_app/utils/spacing.dart';
 import 'package:reminder_app/utils/theme.dart';
 import 'package:toastification/toastification.dart';
@@ -20,7 +21,7 @@ class _CreateTeamDialogState extends State<CreateTeamDialog> {
   final _teamNameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _emailController = TextEditingController();
-  final List<String> _invitedEmails = [];
+  final List<TeamMember> _invitedMembers = [];
 
   @override
   void dispose() {
@@ -30,22 +31,52 @@ class _CreateTeamDialogState extends State<CreateTeamDialog> {
     super.dispose();
   }
 
-  void _addEmail() {
+  void _addMember() {
     final email = _emailController.text.trim();
     if (email.isNotEmpty &&
         email.contains('@') &&
-        !_invitedEmails.contains(email)) {
+        !_invitedMembers.any((member) => member.email == email)) {
       setState(() {
-        _invitedEmails.add(email);
+        _invitedMembers.add(
+          TeamMember(
+            email: email,
+            role: TeamRole.member,
+            name: email.split('@')[0],
+            avatarUrl: 'assets/images/profile.png',
+          ),
+        );
         _emailController.clear();
       });
     }
   }
 
-  void _removeEmail(String email) {
+  void _removeMember(TeamMember member) {
     setState(() {
-      _invitedEmails.remove(email);
+      _invitedMembers.remove(member);
     });
+  }
+
+  void _updateMemberRole(TeamMember member, TeamRole newRole) {
+    setState(() {
+      final index = _invitedMembers.indexOf(member);
+      _invitedMembers[index] = TeamMember(
+        email: member.email,
+        role: newRole,
+        name: member.name,
+        avatarUrl: member.avatarUrl,
+      );
+    });
+  }
+
+  String _getRoleText(TeamRole role) {
+    switch (role) {
+      case TeamRole.admin:
+        return 'Admin';
+      case TeamRole.member:
+        return 'Member';
+      case TeamRole.viewer:
+        return 'Viewer';
+    }
   }
 
   @override
@@ -78,7 +109,7 @@ class _CreateTeamDialogState extends State<CreateTeamDialog> {
                     ),
                     IconButton(
                       onPressed: () {
-                        _invitedEmails.clear();
+                        _invitedMembers.clear();
                         Navigator.pop(context);
                       },
                       icon: const Icon(Icons.close),
@@ -142,13 +173,13 @@ class _CreateTeamDialogState extends State<CreateTeamDialog> {
                           ),
                           const SizedBox(width: 8),
                           IconButton(
-                            onPressed: _addEmail,
+                            onPressed: _addMember,
                             icon: const Icon(Icons.add_circle),
                             color: primaryColor,
                           ),
                         ],
                       ),
-                      if (_invitedEmails.isNotEmpty) ...[
+                      if (_invitedMembers.isNotEmpty) ...[
                         const SizedBox(height: 16),
                         const Text(
                           'Invited Members:',
@@ -171,7 +202,7 @@ class _CreateTeamDialogState extends State<CreateTeamDialog> {
                           child: SingleChildScrollView(
                             child: Column(
                               children:
-                                  _invitedEmails.map((email) {
+                                  _invitedMembers.map((member) {
                                     return Padding(
                                       padding: const EdgeInsets.symmetric(
                                         vertical: 4,
@@ -184,11 +215,46 @@ class _CreateTeamDialogState extends State<CreateTeamDialog> {
                                           ),
                                           const SizedBox(width: 8),
                                           Expanded(
-                                            child: Text(
-                                              email,
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                              ),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  member.email,
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  _getRoleText(member.role),
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: primaryColor,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          PopupMenuButton<TeamRole>(
+                                            enabled: true,
+                                            itemBuilder:
+                                                (context) =>
+                                                    TeamRole.values.map((role) {
+                                                      return PopupMenuItem(
+                                                        value: role,
+                                                        child: Text(
+                                                          _getRoleText(role),
+                                                        ),
+                                                      );
+                                                    }).toList(),
+                                            onSelected:
+                                                (role) => _updateMemberRole(
+                                                  member,
+                                                  role,
+                                                ),
+                                            child: const Icon(
+                                              Icons.edit,
+                                              size: 18,
                                             ),
                                           ),
                                           IconButton(
@@ -197,9 +263,7 @@ class _CreateTeamDialogState extends State<CreateTeamDialog> {
                                               size: 18,
                                             ),
                                             onPressed:
-                                                () => _removeEmail(email),
-                                            padding: EdgeInsets.zero,
-                                            constraints: const BoxConstraints(),
+                                                () => _removeMember(member),
                                           ),
                                         ],
                                       ),
@@ -209,52 +273,49 @@ class _CreateTeamDialogState extends State<CreateTeamDialog> {
                           ),
                         ),
                       ],
+                      const VerticalSpace(24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              _invitedMembers.clear();
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Cancel'),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                if (_invitedMembers.isEmpty) {
+                                  showToast(
+                                    context,
+                                    type: ToastificationType.error,
+                                    title: 'Error',
+                                    description:
+                                        'Please add at least one team member',
+                                  );
+                                  return;
+                                }
+                                widget.onCreateTeam(
+                                  _teamNameController.text,
+                                  _descriptionController.text,
+                                  _invitedMembers.map((m) => m.email).toList(),
+                                );
+                                Navigator.pop(context);
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryColor,
+                              foregroundColor: Colors.white,
+                            ),
+                            child: const Text('Create Team'),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        _invitedEmails.clear();
-                        Navigator.pop(context);
-                      },
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(fontFamily: "Sora", fontSize: 14),
-                      ),
-                    ),
-                    const HorizontalSpace(10),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          widget.onCreateTeam(
-                            _teamNameController.text,
-                            _descriptionController.text,
-                            _invitedEmails,
-                          );
-                          Navigator.pop(context);
-                          showToast(
-                            context,
-                            type: ToastificationType.success,
-                            title: 'Team Created!',
-                            description:
-                                'Team ${_teamNameController.text} created successfully',
-                          );
-                          _teamNameController.clear();
-                          _descriptionController.clear();
-                          _emailController.clear();
-                          _invitedEmails.clear();
-                        }
-                      },
-                      child: const Text(
-                        'Create Team',
-                        style: TextStyle(fontFamily: "Sora", fontSize: 14),
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),

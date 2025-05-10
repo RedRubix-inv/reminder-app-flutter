@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:reminder_app/components/custom_appbar.dart';
+import 'package:reminder_app/components/delete_dialog/delete_dialog.dart';
+import 'package:reminder_app/components/show_toast.dart';
+import 'package:reminder_app/components/team_members_dialog/team_members_dialog.dart';
+import 'package:reminder_app/pages/home/home_view.dart';
+import 'package:reminder_app/utils/helpers.dart';
 import 'package:reminder_app/utils/spacing.dart';
 import 'package:reminder_app/utils/theme.dart';
+import 'package:toastification/toastification.dart';
 
 class ReminderDetailsView extends StatelessWidget {
   final String title;
@@ -11,6 +16,7 @@ class ReminderDetailsView extends StatelessWidget {
   final TimeOfDay time;
   final List<DateTime> dates;
   final String frequency;
+  final List<TeamMember> teamMembers;
 
   const ReminderDetailsView({
     super.key,
@@ -19,7 +25,18 @@ class ReminderDetailsView extends StatelessWidget {
     required this.time,
     required this.dates,
     required this.frequency,
+    this.teamMembers = const [],
   });
+
+  void _handleDelete(BuildContext context) {
+    // TODO: Implement actual delete functionality
+    showToast(
+      context,
+      type: ToastificationType.success,
+      title: 'Reminder Deleted',
+      description: 'Reminder "$title" has been deleted successfully',
+    );
+  }
 
   String _getRelativeTime(DateTime date, TimeOfDay time) {
     final now = DateTime.now();
@@ -136,7 +153,7 @@ class ReminderDetailsView extends StatelessWidget {
         border: Border.all(color: primaryColor.withOpacity(0.2)),
       ),
       child: Text(
-        DateFormat('dd/MM/yyyy').format(date),
+        formatDateToHumanReadable(date),
         style: TextStyle(
           color: textColor,
           fontSize: 14,
@@ -175,9 +192,6 @@ class ReminderDetailsView extends StatelessWidget {
       appBar: CustomAppBar(
         displayMode: LeadingDisplayMode.backWithText,
         leadingText: 'Reminder Details',
-        onNotificationPressed: () {
-          // TODO: Implement notification action
-        },
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -185,6 +199,7 @@ class ReminderDetailsView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
+              width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -219,16 +234,64 @@ class ReminderDetailsView extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              title,
-                              style: TextStyle(
-                                color: textColor,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Sora',
-                              ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    title,
+                                    style: TextStyle(
+                                      color: textColor,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Sora',
+                                    ),
+                                  ),
+                                ),
+                                if (teamMembers.isNotEmpty)
+                                  IconButton(
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return TeamMembersDialog(
+                                            teamMembers: teamMembers,
+                                            title: 'Team Members',
+                                          );
+                                        },
+                                      );
+                                    },
+                                    icon: Icon(
+                                      LucideIcons.users2,
+                                      color: primaryColor,
+                                      size: 24,
+                                    ),
+                                    tooltip: 'View Team Members',
+                                  ),
+                                IconButton(
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return DeleteDialog(
+                                          title: 'Delete Reminder',
+                                          message:
+                                              'Are you sure you want to delete this reminder?',
+                                          onDelete:
+                                              () => _handleDelete(context),
+                                        );
+                                      },
+                                    );
+                                  },
+                                  icon: Icon(
+                                    LucideIcons.trash2,
+                                    color: Colors.red,
+                                    size: 24,
+                                  ),
+                                  tooltip: 'Delete Reminder',
+                                ),
+                              ],
                             ),
-                            const VerticalSpace(4),
+                            const VerticalSpace(2),
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
@@ -269,7 +332,6 @@ class ReminderDetailsView extends StatelessWidget {
                           size: 24,
                         ),
                       ),
-
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -289,6 +351,7 @@ class ReminderDetailsView extends StatelessWidget {
             ),
             const VerticalSpace(24),
             Container(
+              width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -309,82 +372,92 @@ class ReminderDetailsView extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: primaryColor.withAlpha(50),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                LucideIcons.clock,
-                                size: 20,
-                                color: primaryColor,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                time.format(context),
-                                style: TextStyle(
-                                  color: textColor,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  fontFamily: 'Sora',
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: primaryColor.withAlpha(50),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      LucideIcons.clock,
+                                      size: 20,
+                                      color: primaryColor,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      time.format(context),
+                                      style: TextStyle(
+                                        color: textColor,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        fontFamily: 'Sora',
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                        const VerticalSpace(8),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: _getTimeBackgroundColor(targetDate, time),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                LucideIcons.hourglass,
-                                size: 20,
-                                color: _getTimeColor(targetDate, time),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                _getRelativeTime(targetDate, time),
-                                style: TextStyle(
-                                  color: _getTimeColor(targetDate, time),
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  fontFamily: 'Sora',
+                            ),
+                            const HorizontalSpace(8),
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: _getTimeBackgroundColor(
+                                    targetDate,
+                                    time,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      LucideIcons.hourglass,
+                                      size: 20,
+                                      color: _getTimeColor(targetDate, time),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      _getRelativeTime(targetDate, time),
+                                      style: TextStyle(
+                                        color: _getTimeColor(targetDate, time),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        fontFamily: 'Sora',
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
+
                   _buildInfoSection(
                     'Dates',
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: primaryColor.withAlpha(30),
-                                borderRadius: BorderRadius.circular(8),
+                                color: primaryColor.withAlpha(50),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                               child: Icon(
-                                LucideIcons.calendar,
-                                size: 20,
+                                LucideIcons.calendarCheck,
                                 color: primaryColor,
+                                size: 24,
                               ),
                             ),
                             const HorizontalSpace(12),
@@ -392,7 +465,7 @@ class ReminderDetailsView extends StatelessWidget {
                               'Selected Dates',
                               style: TextStyle(
                                 color: textColor,
-                                fontSize: 16,
+                                fontSize: 18,
                                 fontWeight: FontWeight.w500,
                                 fontFamily: 'Sora',
                               ),
@@ -404,7 +477,7 @@ class ReminderDetailsView extends StatelessWidget {
                           width: double.infinity,
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Wrap(
-                            alignment: WrapAlignment.spaceEvenly,
+                            alignment: WrapAlignment.start,
                             spacing: 12,
                             runSpacing: 12,
                             children: dates.map(_buildDateChip).toList(),
@@ -416,42 +489,6 @@ class ReminderDetailsView extends StatelessWidget {
                 ],
               ),
             ),
-            const VerticalSpace(24),
-            // Row(
-            //   children: [
-            //     Expanded(
-            //       child: OutlinedButton.icon(
-            //         onPressed: () {
-            //           // TODO: Implement snooze functionality
-            //         },
-            //         icon: const Icon(Icons.snooze),
-            //         label: const Text('Snooze'),
-            //         style: OutlinedButton.styleFrom(
-            //           padding: const EdgeInsets.symmetric(vertical: 16),
-            //           shape: RoundedRectangleBorder(
-            //             borderRadius: BorderRadius.circular(12),
-            //           ),
-            //         ),
-            //       ),
-            //     ),
-            //     const SizedBox(width: 16),
-            //     Expanded(
-            //       child: FilledButton.icon(
-            //         onPressed: () {
-            //           // TODO: Implement mark as done functionality
-            //         },
-            //         icon: const Icon(Icons.check),
-            //         label: const Text('Mark as Done'),
-            //         style: FilledButton.styleFrom(
-            //           padding: const EdgeInsets.symmetric(vertical: 16),
-            //           shape: RoundedRectangleBorder(
-            //             borderRadius: BorderRadius.circular(12),
-            //           ),
-            //         ),
-            //       ),
-            //     ),
-            //   ],
-            // ),
           ],
         ),
       ),

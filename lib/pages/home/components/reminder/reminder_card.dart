@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:reminder_app/utils/helpers.dart';
 import 'package:reminder_app/utils/spacing.dart';
 import 'package:reminder_app/utils/theme.dart';
 
@@ -10,7 +11,7 @@ class ReminderCard extends StatelessWidget {
   final List<DateTime> dates;
   final String frequency;
   final VoidCallback? onTap;
-
+  final String type;
   const ReminderCard({
     super.key,
     required this.title,
@@ -18,6 +19,7 @@ class ReminderCard extends StatelessWidget {
     required this.time,
     required this.dates,
     required this.frequency,
+    required this.type,
     this.onTap,
   });
 
@@ -147,19 +149,32 @@ class ReminderCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(LucideIcons.bell, color: textColor, size: 20),
-                  const SizedBox(width: 8),
+                  Icon(
+                    type.toUpperCase() == 'PERSONAL'
+                        ? LucideIcons.user2
+                        : LucideIcons.users2,
+                    size: 20,
+                    color: textColor,
+                  ),
+                  const HorizontalSpace(8),
                   Expanded(
-                    child: Text(
-                      title,
-                      style: TextStyle(
-                        color: textColor,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Sora',
-                      ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: TextStyle(
+                              color: textColor,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Sora',
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -170,7 +185,7 @@ class ReminderCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      frequency,
+                      formatDateToHumanReadable(targetDate),
                       style: TextStyle(
                         color: textColor,
                         fontSize: 12,

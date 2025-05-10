@@ -13,6 +13,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? avatarImageUrl;
   final VoidCallback? onNotificationPressed;
   final String? leadingText;
+  final bool showNotification;
 
   const CustomAppBar({
     super.key,
@@ -21,6 +22,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.avatarImageUrl,
     this.onNotificationPressed,
     this.leadingText,
+    this.showNotification = true,
   });
 
   @override
@@ -75,12 +77,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         title: titleWidget != null ? Center(child: titleWidget) : null,
         centerTitle: true,
         actions: [
-          if (onNotificationPressed != null)
+          if (showNotification)
             Padding(
               padding: const EdgeInsets.only(right: 16.0),
               child: GestureDetector(
-                onTap: () => context.push(RouteName.notifications),
-                child: Icon(LucideIcons.bell, color: textColor, size: 30),
+                onTap: () {
+                  if (onNotificationPressed != null) {
+                    onNotificationPressed!();
+                  } else {
+                    context.push(RouteName.notifications);
+                  }
+                },
+                child: Icon(LucideIcons.bellRing, color: textColor, size: 30),
               ),
             ),
         ],

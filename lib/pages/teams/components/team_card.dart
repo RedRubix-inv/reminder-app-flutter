@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:reminder_app/models/team.dart';
-import 'package:reminder_app/pages/teams_list/components/team_management.dart';
+import 'package:reminder_app/pages/teams/components/team_management.dart';
+import 'package:reminder_app/pages/teams/team_reminders_view.dart';
 
 class TeamCard extends StatelessWidget {
   final Team team;
@@ -56,23 +57,41 @@ class TeamCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '${team.members} members',
+                        '${team.memberCount} members',
                         style: TextStyle(color: Colors.grey[600], fontSize: 14),
                       ),
                     ],
                   ),
                 ),
-                IconButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TeamManagementView(team: team),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.arrow_forward_ios, size: 16),
-                  color: Colors.grey[600],
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TeamRemindersView(team: team),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.notifications_outlined),
+                      tooltip: 'View Reminders',
+                      color: Colors.grey[600],
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => TeamManagementView(team: team),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.arrow_forward_ios, size: 16),
+                      color: Colors.grey[600],
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -83,6 +102,19 @@ class TeamCard extends StatelessWidget {
                 style: TextStyle(color: Colors.grey[600], fontSize: 14),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
+              ),
+            ],
+            if (team.reminders.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  const Icon(Icons.notifications, size: 16, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${team.reminders.length} active reminders',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                  ),
+                ],
               ),
             ],
           ],

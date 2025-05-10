@@ -8,12 +8,28 @@ import 'package:reminder_app/utils/router.dart';
 import 'package:reminder_app/utils/spacing.dart';
 import 'package:reminder_app/utils/theme.dart';
 
+enum TeamRole { admin, member, moderator }
+
+class TeamMember {
+  final String name;
+  final String email;
+  final TeamRole role;
+
+  const TeamMember({
+    required this.name,
+    required this.email,
+    required this.role,
+  });
+}
+
 class Reminder {
   final String title;
   final String description;
   final TimeOfDay time;
   final List<DateTime> dates;
   final String frequency;
+  final String type;
+  final List<TeamMember> teamMembers;
 
   Reminder({
     required this.title,
@@ -21,6 +37,8 @@ class Reminder {
     required this.time,
     required this.dates,
     required this.frequency,
+    required this.type,
+    this.teamMembers = const [],
   });
 }
 
@@ -40,6 +58,49 @@ class HomeView extends StatelessWidget {
           DateTime.now().add(const Duration(days: 3)),
         ],
         frequency: 'Weekday (Mon-Fri)',
+        type: 'team',
+        teamMembers: [
+          TeamMember(
+            name: 'Manish Maharjan',
+            email: 'manish.maharjan@example.com',
+            role: TeamRole.admin,
+          ),
+          TeamMember(
+            name: 'John Doe',
+            email: 'john.doe@example.com',
+            role: TeamRole.moderator,
+          ),
+          TeamMember(
+            name: 'Jane Smith',
+            email: 'jane.smith@example.com',
+            role: TeamRole.member,
+          ),
+          TeamMember(
+            name: 'Bhavudipu',
+            email: 'bhavudipu@example.com',
+            role: TeamRole.member,
+          ),
+          TeamMember(
+            name: 'Jane Smith',
+            email: 'jane.smith@example.com',
+            role: TeamRole.member,
+          ),
+          TeamMember(
+            name: 'Jane Smith',
+            email: 'jane.smith@example.com',
+            role: TeamRole.member,
+          ),
+          TeamMember(
+            name: 'Jane Smith',
+            email: 'jane.smith@example.com',
+            role: TeamRole.member,
+          ),
+          TeamMember(
+            name: 'Jane Smith',
+            email: 'jane.smith@example.com',
+            role: TeamRole.member,
+          ),
+        ],
       ),
       Reminder(
         title: 'Project Review',
@@ -47,6 +108,7 @@ class HomeView extends StatelessWidget {
         time: const TimeOfDay(hour: 14, minute: 30),
         dates: [DateTime.now().subtract(const Duration(days: 5))],
         frequency: 'One-time',
+        type: 'personal',
       ),
       Reminder(
         title: 'Gym Session',
@@ -56,11 +118,20 @@ class HomeView extends StatelessWidget {
           DateTime.now().subtract(const Duration(days: 1)),
           DateTime.now().add(const Duration(days: 3)),
           DateTime.now().add(const Duration(days: 5)),
+          DateTime.now().add(const Duration(days: 7)),
+          DateTime.now().add(const Duration(days: 9)),
+          DateTime.now().add(const Duration(days: 11)),
+          DateTime.now().add(const Duration(days: 13)),
+          DateTime.now().add(const Duration(days: 15)),
+          DateTime.now().add(const Duration(days: 17)),
+          DateTime.now().add(const Duration(days: 19)),
+          DateTime.now().add(const Duration(days: 21)),
         ],
         frequency: 'Multiple Dates',
+        type: 'personal',
       ),
       Reminder(
-        title: 'Weekend Planning',
+        title: 'Weekend Planning Of MAIDAAN',
         description: 'Plan activities for the weekend',
         time: const TimeOfDay(hour: 11, minute: 0),
         dates: [
@@ -68,6 +139,24 @@ class HomeView extends StatelessWidget {
           DateTime.now().add(const Duration(days: 7)),
         ],
         frequency: 'Weekend (Sat-Sun)',
+        type: 'team',
+        teamMembers: [
+          TeamMember(
+            name: 'Manish Maharjan',
+            email: 'manish.maharjan@example.com',
+            role: TeamRole.admin,
+          ),
+          TeamMember(
+            name: 'John Doe',
+            email: 'john.doe@example.com',
+            role: TeamRole.moderator,
+          ),
+          TeamMember(
+            name: 'Jane Smith',
+            email: 'jane.smith@example.com',
+            role: TeamRole.member,
+          ),
+        ],
       ),
       Reminder(
         title: 'Client Call',
@@ -75,6 +164,32 @@ class HomeView extends StatelessWidget {
         time: const TimeOfDay(hour: 15, minute: 0),
         dates: [DateTime.now().add(const Duration(days: 2))],
         frequency: 'One-time',
+        type: 'personal',
+      ),
+      Reminder(
+        title: 'Team Standup',
+        description: 'Daily team sync to discuss progress and blockers',
+        time: const TimeOfDay(hour: 10, minute: 0),
+        dates: [DateTime.now().add(const Duration(days: 1))],
+        frequency: 'Weekday (Mon-Fri)',
+        type: 'team',
+        teamMembers: [
+          TeamMember(
+            name: 'Manish Maharjan',
+            email: 'manish.maharjan@example.com',
+            role: TeamRole.admin,
+          ),
+          TeamMember(
+            name: 'John Doe',
+            email: 'john.doe@example.com',
+            role: TeamRole.moderator,
+          ),
+          TeamMember(
+            name: 'Jane Smith',
+            email: 'jane.smith@example.com',
+            role: TeamRole.member,
+          ),
+        ],
       ),
     ];
 
@@ -83,7 +198,6 @@ class HomeView extends StatelessWidget {
       appBar: CustomAppBar(
         displayMode: LeadingDisplayMode.avatarOnly,
         avatarImageUrl: 'assets/images/profile.png',
-        onNotificationPressed: () {},
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(
@@ -156,6 +270,7 @@ class HomeView extends StatelessWidget {
                       time: reminder.time,
                       dates: reminder.dates,
                       frequency: reminder.frequency,
+                      type: reminder.type,
                       onTap: () {
                         Navigator.push(
                           context,
@@ -167,6 +282,7 @@ class HomeView extends StatelessWidget {
                                   time: reminder.time,
                                   dates: reminder.dates,
                                   frequency: reminder.frequency,
+                                  teamMembers: reminder.teamMembers,
                                 ),
                           ),
                         );
