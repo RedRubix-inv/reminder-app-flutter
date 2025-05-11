@@ -14,6 +14,7 @@ import 'package:reminder_app/pages/profile/profile_view.dart';
 import 'package:reminder_app/pages/tasks/tasks_view.dart';
 import 'package:reminder_app/pages/teams/components/team_management.dart';
 import 'package:reminder_app/pages/teams/teams_view.dart';
+import 'package:reminder_app/pages/test/test_view.dart';
 import 'package:reminder_app/utils/theme.dart';
 
 import '../pages/onboarding/onboarding_state.dart';
@@ -35,10 +36,11 @@ class RouteName {
   static const String createReminder = '/create-reminder';
   static const String teamManagement = '/team-management';
   static const String notifications = '/notifications';
+  static const String test = '/test';
 }
 
 final router = GoRouter(
-  initialLocation: RouteName.onBoarding,
+  initialLocation: RouteName.home,
   redirect: (context, state) {
     return null;
   },
@@ -84,6 +86,12 @@ final router = GoRouter(
       path: RouteName.createReminder,
       builder: (context, state) {
         return const CreateReminderView();
+      },
+    ),
+    GoRoute(
+      path: RouteName.test,
+      builder: (context, state) {
+        return const TestView();
       },
     ),
     ShellRoute(

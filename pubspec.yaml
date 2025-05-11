@@ -39,6 +39,8 @@ dependencies:
   curved_navigation_bar: ^1.0.6
   lucide_icons: ^0.257.0
   timeago: ^3.7.0
+  flutter_local_notifications: ^19.2.0
+  timezone: ^0.10.1
 
 dev_dependencies:
   flutter_test:

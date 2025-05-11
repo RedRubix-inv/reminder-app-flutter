@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:reminder_app/utils/router.dart';
 import 'package:reminder_app/utils/spacing.dart';
 import 'package:reminder_app/utils/theme.dart';
 
@@ -97,6 +99,13 @@ class ProfileView extends StatelessWidget {
                         child: _buildSection(
                           title: 'Current plan',
                           items: [
+                            _buildMenuItem(
+                              icon: Icons.star_outline,
+                              title: 'Test Page',
+                              onTap: () {
+                                GoRouter.of(context).push(RouteName.test);
+                              },
+                            ),
                             _buildMenuItem(
                               icon: Icons.star_outline,
                               title: 'Standard',
@@ -280,25 +289,29 @@ class ProfileView extends StatelessWidget {
     required String title,
     required VoidCallback onTap,
   }) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Icon(icon, color: primaryColor),
-            const SizedBox(width: 16),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 16,
-                color: textColor,
-                fontFamily: 'Sora',
+    return SizedBox(
+      width: double.infinity,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              Icon(icon, color: primaryColor),
+              const SizedBox(width: 16),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: textColor,
+                  fontFamily: 'Sora',
+                ),
               ),
-            ),
-            const Spacer(),
-            Icon(Icons.chevron_right, color: textColorSecondary),
-          ],
+              const Spacer(),
+              Icon(Icons.chevron_right, color: textColorSecondary),
+            ],
+          ),
         ),
       ),
     );
