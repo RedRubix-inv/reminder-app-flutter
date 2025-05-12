@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:reminder_app/pages/profile/profile_state.dart';
+import 'package:reminder_app/services/auth_service.dart';
 import 'package:reminder_app/utils/router.dart';
 import 'package:reminder_app/utils/spacing.dart';
 import 'package:reminder_app/utils/theme.dart';
@@ -10,6 +13,20 @@ class ProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (context) => ProfileState(AuthService()),
+      child: const _ProfileViewContent(),
+    );
+  }
+}
+
+class _ProfileViewContent extends StatelessWidget {
+  const _ProfileViewContent();
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<ProfileState>();
+
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Stack(
@@ -47,15 +64,27 @@ class ProfileView extends StatelessWidget {
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(60),
-                          child: Image.asset(
-                            'assets/images/profile.png',
-                            fit: BoxFit.cover,
-                          ),
+                          child:
+                              state.userPhotoUrl != null
+                                  ? Image.network(
+                                    state.userPhotoUrl!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            Image.asset(
+                                              'assets/images/profile.png',
+                                              fit: BoxFit.cover,
+                                            ),
+                                  )
+                                  : Image.asset(
+                                    'assets/images/profile.png',
+                                    fit: BoxFit.cover,
+                                  ),
                         ),
                       ),
                       const VerticalSpace(20),
                       Text(
-                        'Manish Maharjan',
+                        state.userName ?? 'User',
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -65,7 +94,7 @@ class ProfileView extends StatelessWidget {
                       ),
                       const VerticalSpace(8),
                       Text(
-                        'maharjanm96@gmail.com',
+                        state.userEmail ?? '',
                         style: TextStyle(
                           fontSize: 16,
                           color: textColorSecondary,
@@ -238,20 +267,35 @@ class ProfileView extends StatelessWidget {
                       ),
                       const VerticalSpace(30),
                       // Sign out button
-                      // GestureDetector(
-                      //   onTap: () {
-                      //     GoRouter.of(context).push(RouteName.login);
-                      //   },
-                      //   child: Text(
-                      //     'Sign Out',
-                      //     style: TextStyle(
-                      //       color: errorColor,
-                      //       fontFamily: "Sora",
-                      //       fontSize: 18,
-                      //       fontWeight: FontWeight.w600,
-                      //     ),
-                      //   ),
-                      // ),
+                      GestureDetector(
+                        onTap: () => state.handleSignOut(context),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: errorColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.logout, color: errorColor),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Sign Out',
+                                style: TextStyle(
+                                  color: errorColor,
+                                  fontFamily: "Sora",
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),

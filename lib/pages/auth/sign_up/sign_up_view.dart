@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:reminder_app/components/app_textfield.dart';
-import 'package:reminder_app/utils/router.dart';
+import 'package:reminder_app/components/button.dart';
+import 'package:reminder_app/pages/auth/sign_up/sign_up_state.dart';
 import 'package:reminder_app/utils/spacing.dart';
 import 'package:reminder_app/utils/theme.dart';
 import 'package:reminder_app/utils/validators.dart';
@@ -15,12 +16,6 @@ class SignUpView extends StatefulWidget {
 
 class _SignUpViewState extends State<SignUpView>
     with SingleTickerProviderStateMixin {
-  final _formKey = GlobalKey<FormState>();
-  String fullName = '';
-  String email = '';
-  String password = '';
-  String confirmPassword = '';
-
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -52,18 +47,10 @@ class _SignUpViewState extends State<SignUpView>
     super.dispose();
   }
 
-  void _printFormValues() {
-    if (_formKey.currentState!.validate()) {
-      print('Form Values:');
-      print('Full Name: $fullName');
-      print('Email: $email');
-      print('Password: $password');
-      print('Confirm Password: $confirmPassword');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<SignUpState>();
+
     return Scaffold(
       backgroundColor: backgroundColor,
       body: SafeArea(
@@ -71,7 +58,7 @@ class _SignUpViewState extends State<SignUpView>
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Form(
-              key: _formKey,
+              key: state.formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -118,17 +105,8 @@ class _SignUpViewState extends State<SignUpView>
                         labelText: "Full Name",
                         prefixIcon: const Icon(Icons.person_outline),
                         keyboardType: TextInputType.name,
-                        onChanged: (value) {
-                          setState(() {
-                            fullName = value;
-                          });
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your name';
-                          }
-                          return null;
-                        },
+                        onChanged: state.onFullNameChanged,
+                        validator: validateFullName,
                       ),
                     ),
                   ),
@@ -142,11 +120,7 @@ class _SignUpViewState extends State<SignUpView>
                         labelText: "Email",
                         prefixIcon: const Icon(Icons.email_outlined),
                         keyboardType: TextInputType.emailAddress,
-                        onChanged: (value) {
-                          setState(() {
-                            email = value;
-                          });
-                        },
+                        onChanged: state.onEmailChanged,
                         validator: validateEmail,
                       ),
                     ),
@@ -162,11 +136,7 @@ class _SignUpViewState extends State<SignUpView>
                         maxLines: 1,
                         prefixIcon: const Icon(Icons.lock_outline),
                         isPassword: true,
-                        onChanged: (value) {
-                          setState(() {
-                            password = value;
-                          });
-                        },
+                        onChanged: state.onPasswordChanged,
                         validator: validatePassword,
                       ),
                     ),
@@ -182,20 +152,10 @@ class _SignUpViewState extends State<SignUpView>
                         maxLines: 1,
                         prefixIcon: const Icon(Icons.lock_outline),
                         isPassword: true,
-                        onChanged: (value) {
-                          setState(() {
-                            confirmPassword = value;
-                          });
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please confirm your password';
-                          }
-                          if (value != password) {
-                            return 'Passwords do not match';
-                          }
-                          return null;
-                        },
+                        onChanged: state.onConfirmPasswordChanged,
+                        validator:
+                            (value) =>
+                                validateConfirmPassword(value, state.password),
                       ),
                     ),
                   ),
@@ -204,28 +164,16 @@ class _SignUpViewState extends State<SignUpView>
                     opacity: _fadeAnimation,
                     child: SlideTransition(
                       position: _slideAnimation,
-                      child: ElevatedButton(
-                        onPressed: _printFormValues,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryColor,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: const Text(
-                          "Sign Up",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: "Sora",
-                          ),
-                        ),
+                      child: CustomButton(
+                        title: "Sign Up",
+                        isLoading: state.isLoading,
+                        onPressed:
+                            state.isLoading
+                                ? null
+                                : () => state.handleSignUp(context),
                       ),
                     ),
                   ),
-
                   const VerticalSpace(20),
                   Row(
                     children: [
@@ -264,46 +212,6 @@ class _SignUpViewState extends State<SignUpView>
                     opacity: _fadeAnimation,
                     child: SlideTransition(
                       position: _slideAnimation,
-                      child: OutlinedButton(
-                        onPressed: () {
-                          print('Continue with Google pressed');
-                        },
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          side: BorderSide(
-                            color: textColorSecondary.withOpacity(0.3),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              'assets/images/google_logo.png',
-                              height: 24,
-                              width: 24,
-                            ),
-                            const SizedBox(width: 12),
-                            const Text(
-                              "Continue with Google",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                fontFamily: "Sora",
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const VerticalSpace(20),
-                  FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: SlideTransition(
-                      position: _slideAnimation,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -315,9 +223,7 @@ class _SignUpViewState extends State<SignUpView>
                             ),
                           ),
                           GestureDetector(
-                            onTap: () {
-                              GoRouter.of(context).push(RouteName.login);
-                            },
+                            onTap: () => state.handleLogin(context),
                             child: Text(
                               "Sign In",
                               style: TextStyle(
@@ -327,12 +233,6 @@ class _SignUpViewState extends State<SignUpView>
                               ),
                             ),
                           ),
-                          // CustomButton(
-                          //   title: "Sign In",
-                          //   onPressed: () {
-                          //     GoRouter.of(context).push(RouteName.login);
-                          //   },
-                          // ),
                         ],
                       ),
                     ),

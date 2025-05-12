@@ -3,6 +3,8 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+    // Add the Google services Gradle plugin
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -15,10 +17,11 @@ android {
         applicationId = "com.example.reminder_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 21
+        minSdk = 23
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+        multiDexEnabled = true
     }
 
     buildTypes {
@@ -59,5 +62,15 @@ flutter {
 dependencies {
     // Add core library desugaring dependency
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
-    // ... rest of your dependencies
+    
+    // Add Firebase BoM (Bill of Materials)
+    implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
+    
+    // Add Firebase dependencies (no version needed with BoM)
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+    
+    // Add multidex support
+    implementation("androidx.multidex:multidex:2.0.1")
 }

@@ -1,155 +1,126 @@
-// import 'package:flutter/material.dart';
-// import 'package:go_router/go_router.dart';
-// import 'package:reminder_app/components/show_toast.dart';
-// import 'package:reminder_app/pages/verification/verification_state.dart';
-// import 'package:reminder_app/services/api-service/auth_service.dart';
-// import 'package:reminder_app/services/api-service/base_http_service.dart';
-// import 'package:reminder_app/utils/router.dart';
-// import 'package:state_view/state_view.dart';
-// import 'package:toastification/toastification.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:reminder_app/services/auth_service.dart';
+import 'package:reminder_app/utils/router.dart';
+import 'package:toastification/toastification.dart';
 
-// import 'sign_up_events.dart';
-// import 'sign_up_view.dart';
+class SignUpState extends ChangeNotifier {
+  final AuthService _authService;
+  final formKey = GlobalKey<FormState>();
 
-// export 'sign_up_events.dart';
+  SignUpState(this._authService) {
+    // Listen to auth state changes
+    _authService.authStateChanges.listen((user) {
+      if (user != null) {
+        // User is signed in
+        notifyListeners();
+      }
+    });
+  }
 
-// class SignUp extends StateView<SignUpState> {
-//   SignUp({super.key})
-//     : super(
-//         stateBuilder: (context) => SignUpState(context),
-//         view: const SignUpView(),
-//       );
-// }
+  String? _email;
+  String? get email => _email;
 
-// class SignUpState extends StateProvider<SignUp, SignUpEvent> {
-//   late AuthService _authService;
+  String? _fullName;
+  String? get fullName => _fullName;
 
-//   SignUpState(super.context) {
-//     _authService = AuthService();
-//   }
+  String? _password;
+  String? get password => _password;
 
-//   final formKey = GlobalKey<FormState>();
+  String? _confirmPassword;
+  String? get confirmPassword => _confirmPassword;
 
-//   String? _email;
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
 
-//   String? get email => _email;
+  void onEmailChanged(String value) {
+    _email = value;
+    notifyListeners();
+  }
 
-//   String? _fullName;
+  void onFullNameChanged(String value) {
+    _fullName = value;
+    notifyListeners();
+  }
 
-//   String? get fullName => _fullName;
+  void onPasswordChanged(String value) {
+    _password = value;
+    notifyListeners();
+  }
 
-//   String? _contact;
+  void onConfirmPasswordChanged(String value) {
+    _confirmPassword = value;
+    notifyListeners();
+  }
 
-//   String? get contact => _contact;
+  void _setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
 
-//   String? _address;
+  Future<void> handleSignUp(BuildContext context) async {
+    if (!formKey.currentState!.validate()) return;
 
-//   String? get address => _address;
+    _setLoading(true);
 
-//   String? _confirmPassword;
+    try {
+      // Clear any previous error messages
+      formKey.currentState?.reset();
 
-//   String? get confirmPassword => _confirmPassword;
+      // Create user with email and password
+      final credential = await _authService.registerWithEmailAndPassword(
+        _email!.trim(),
+        _password!,
+      );
 
-//   String? _password;
+      // Update user profile with full name
+      if (credential.user != null) {
+        await credential.user!.updateDisplayName(_fullName);
 
-//   String? get password => _password;
+        // Show success message
+        if (context.mounted) {
+          toastification.show(
+            context: context,
+            type: ToastificationType.success,
+            title: const Text('Success'),
+            description: const Text('Account created successfully!'),
+            autoCloseDuration: const Duration(seconds: 3),
+            alignment: Alignment.topCenter,
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          );
 
-//   bool registerLoading = false;
+          // Navigate to home page after a short delay to show the toast
+          await Future.delayed(const Duration(seconds: 1));
+          if (context.mounted) {
+            GoRouter.of(context).go(RouteName.home);
+          }
+        }
+      }
+    } catch (e) {
+      // Show error message
+      if (context.mounted) {
+        toastification.show(
+          context: context,
+          type: ToastificationType.error,
+          title: const Text('Sign Up Failed'),
+          description: Text(e.toString()),
+          autoCloseDuration: const Duration(seconds: 3),
+          alignment: Alignment.topCenter,
+          margin: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        );
+      }
+    } finally {
+      if (context.mounted) {
+        _setLoading(false);
+      }
+    }
+  }
 
-//   bool get isLoading => registerLoading;
+  void handleLogin(BuildContext context) {
+    GoRouter.of(context).go(RouteName.login);
+  }
+}
 
-//   @override
-//   void onEvent(SignUpEvent event) {
-//     if (event is OnEmailChanged) {
-//       _email = event.email;
-//       notifyListeners();
-//       return;
-//     }
-
-//     if (event is OnFullNameChanged) {
-//       _fullName = event.fullName;
-//       notifyListeners();
-//       return;
-//     }
-
-//     if (event is OnContactChanged) {
-//       _contact = event.contact;
-//       notifyListeners();
-//       return;
-//     }
-
-//     if (event is OnAddressChanged) {
-//       _address = event.address;
-//       notifyListeners();
-//       return;
-//     }
-
-//     if (event is OnPasswordChanged) {
-//       _password = event.password;
-//       notifyListeners();
-//       return;
-//     }
-
-//     if (event is OnConfirmPasswordChanged) {
-//       _confirmPassword = event.confirmPassword;
-//       notifyListeners();
-//       return;
-//     }
-
-//     if (event is OnSignUp) {
-//       _handleSignUp();
-//       return;
-//     }
-
-//     if (event is OnLogin) {
-//       GoRouter.of(context).pop();
-//     }
-
-//     return;
-//   }
-
-//   void setRegisterLoading(bool value) {
-//     registerLoading = value;
-//     notifyListeners();
-//   }
-
-//   Future<void> _handleSignUp() async {
-//     if (!formKey.currentState!.validate()) {
-//       return;
-//     }
-
-//     setRegisterLoading(true);
-
-//     final result = await _authService.register(
-//       name: _fullName!,
-//       email: _email ?? "",
-//       password: _password!,
-//       phone: _contact!,
-//       address: _address!,
-//     );
-
-//     setRegisterLoading(false);
-
-//     if (result is SuccessResponse && result.statusCode == 201) {
-//       //TODO: Navigate to verification Page
-//       showToast(
-//         context,
-//         title: "Success",
-//         description: result.data["message"],
-//         type: ToastificationType.success,
-//       );
-
-//       GoRouter.of(context).pushReplacement(
-//         RouteName.verification,
-//         extra: {"contact": _contact, "pageType": PageType.verifyOTP},
-//       );
-//     } else {
-//       showToast(
-//         context,
-//         title: "Oops!!",
-//         description: result.data["message"] ?? "Something went wrong",
-//         type: ToastificationType.error,
-//       );
-//     }
-//   }
-// }
+final navigatorKey = GlobalKey<NavigatorState>();

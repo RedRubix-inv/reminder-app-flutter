@@ -2,8 +2,12 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:provider/provider.dart';
 import 'package:reminder_app/models/team.dart';
+// import 'package:reminder_app/pages/auth/forgot_password_page.dart';
+import 'package:reminder_app/pages/auth/login/login_state.dart';
 import 'package:reminder_app/pages/auth/login/login_view.dart';
+import 'package:reminder_app/pages/auth/sign_up/sign_up_state.dart';
 import 'package:reminder_app/pages/auth/sign_up/sign_up_view.dart';
 import 'package:reminder_app/pages/calendar/calendar_view.dart';
 import 'package:reminder_app/pages/home/components/meeting/create_meeting_view.dart';
@@ -15,18 +19,17 @@ import 'package:reminder_app/pages/tasks/tasks_view.dart';
 import 'package:reminder_app/pages/teams/components/team_management.dart';
 import 'package:reminder_app/pages/teams/teams_view.dart';
 import 'package:reminder_app/pages/test/test_view.dart';
+import 'package:reminder_app/services/auth_service.dart';
 import 'package:reminder_app/utils/theme.dart';
 
 import '../pages/onboarding/onboarding_state.dart';
 
 class RouteName {
   static const String splashScreen = '/';
-  static const String signUp = '/auth/sign_up';
-  static const String login = '/auth/login';
+  static const String login = '/login';
+  static const String signUp = '/sign-up';
+  static const String forgotPassword = '/forgot-password';
   static const String onBoarding = '/onboarding';
-  static const String forgotPassword = '/auth/forgot_password';
-  static const String verification = '/auth/verification';
-  static const String resetPassword = '/auth/reset_password';
   static const String home = '/home';
   static const String tasks = '/tasks';
   static const String teams = '/teams';
@@ -40,34 +43,66 @@ class RouteName {
 }
 
 final router = GoRouter(
-  initialLocation: RouteName.home,
+  initialLocation: RouteName.login,
   redirect: (context, state) {
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final isLoggedIn = authService.currentUser != null;
+    final isAuthRoute =
+        state.matchedLocation == RouteName.login ||
+        state.matchedLocation == RouteName.signUp ||
+        state.matchedLocation == RouteName.forgotPassword;
+
+    debugPrint(
+      'Router redirect - isLoggedIn: $isLoggedIn, isAuthRoute: $isAuthRoute, path: ${state.matchedLocation}',
+    );
+
+    if (!isLoggedIn && !isAuthRoute) {
+      debugPrint('Redirecting to login - user not authenticated');
+      return RouteName.login;
+    }
+
+    if (isLoggedIn && isAuthRoute) {
+      debugPrint('Redirecting to home - user already authenticated');
+      return RouteName.home;
+    }
+
+    debugPrint('No redirect needed');
     return null;
   },
   routes: [
     GoRoute(
-      path: RouteName.onBoarding,
-      builder: (context, state) {
-        return Onboarding();
-      },
+      path: RouteName.login,
+      builder:
+          (context, state) => ChangeNotifierProvider(
+            create:
+                (context) => LoginState(
+                  Provider.of<AuthService>(context, listen: false),
+                ),
+            child: const LoginView(),
+          ),
     ),
     GoRoute(
       path: RouteName.signUp,
-      builder: (context, state) {
-        return const SignUpView();
-      },
+      builder:
+          (context, state) => ChangeNotifierProvider(
+            create:
+                (context) => SignUpState(
+                  Provider.of<AuthService>(context, listen: false),
+                ),
+            child: const SignUpView(),
+          ),
     ),
+    // GoRoute(
+    //   path: RouteName.forgotPassword,
+    //   builder: (context, state) => const ForgotPasswordPage(),
+    // ),
     GoRoute(
-      path: RouteName.login,
-      builder: (context, state) {
-        return const LoginView();
-      },
+      path: RouteName.onBoarding,
+      builder: (context, state) => Onboarding(),
     ),
     GoRoute(
       path: RouteName.createMeeting,
-      builder: (context, state) {
-        return const CreateMeetingView();
-      },
+      builder: (context, state) => const CreateMeetingView(),
     ),
     GoRoute(
       path: RouteName.teamManagement,
@@ -78,21 +113,15 @@ final router = GoRouter(
     ),
     GoRoute(
       path: RouteName.notifications,
-      builder: (context, state) {
-        return const NotificationView();
-      },
+      builder: (context, state) => const NotificationView(),
     ),
     GoRoute(
       path: RouteName.createReminder,
-      builder: (context, state) {
-        return const CreateReminderView();
-      },
+      builder: (context, state) => const CreateReminderView(),
     ),
     GoRoute(
       path: RouteName.test,
-      builder: (context, state) {
-        return const TestView();
-      },
+      builder: (context, state) => const TestView(),
     ),
     ShellRoute(
       builder: (context, state, child) {

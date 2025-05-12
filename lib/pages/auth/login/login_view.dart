@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:reminder_app/components/app_textfield.dart';
-import 'package:reminder_app/components/button.dart';
-import 'package:reminder_app/utils/router.dart';
+import 'package:reminder_app/pages/auth/login/login_state.dart';
 import 'package:reminder_app/utils/spacing.dart';
 import 'package:reminder_app/utils/theme.dart';
 import 'package:reminder_app/utils/validators.dart';
@@ -20,9 +19,6 @@ class _LoginViewState extends State<LoginView>
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
-  String email = '';
-  String password = '';
-
   @override
   void initState() {
     super.initState();
@@ -39,7 +35,7 @@ class _LoginViewState extends State<LoginView>
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.2),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     _controller.forward();
   }
@@ -50,233 +46,245 @@ class _LoginViewState extends State<LoginView>
     super.dispose();
   }
 
-  void toggleView() {
-    setState(() {
-      _controller.reset();
-      _controller.forward();
-    });
-  }
-
-  void handleAuth() {
-    // TODO: Implement authentication logic
-    print('Email: $email, Password: $password');
-    GoRouter.of(context).push(RouteName.home);
-  }
-
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<LoginState>();
+
     return Scaffold(
       backgroundColor: backgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const VerticalSpace(40),
-                SlideTransition(
-                  position: _slideAnimation,
-                  child: FadeTransition(
+            child: Form(
+              key: state.formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const VerticalSpace(10),
+                  FadeTransition(
                     opacity: _fadeAnimation,
-                    child: Text(
-                      "Welcome Back!",
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: textColor,
-                        fontFamily: "Sora",
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-                const VerticalSpace(40),
-                SlideTransition(
-                  position: _slideAnimation,
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: Text(
-                      "Sign in to continue",
-
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: textColorSecondary,
-                        fontFamily: "Sora",
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-                const VerticalSpace(40),
-                SlideTransition(
-                  position: _slideAnimation,
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: AppTextField(
-                      hintText: "Email",
-                      labelText: "Email",
-                      prefixIcon: const Icon(Icons.email_outlined),
-                      keyboardType: TextInputType.emailAddress,
-                      onChanged: (value) {
-                        setState(() {
-                          email = value;
-                        });
-                      },
-                      validator: validateEmail,
-                    ),
-                  ),
-                ),
-                const VerticalSpace(20),
-                SlideTransition(
-                  position: _slideAnimation,
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: AppTextField(
-                      hintText: "Password",
-                      labelText: "Password",
-                      maxLines: 1,
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      isPassword: true,
-                      onChanged: (value) {
-                        setState(() {
-                          password = value;
-                        });
-                      },
-                      validator: validatePassword,
-                    ),
-                  ),
-                ),
-
-                const VerticalSpace(40),
-
-                SlideTransition(
-                  position: _slideAnimation,
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: CustomButton(
-                      title: "Sign In",
-                      onPressed: () {
-                        handleAuth();
-                      },
-                    ),
-                  ),
-                ),
-
-                const VerticalSpace(20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Divider(
-                        color: textColorSecondary.withOpacity(0.3),
-                        thickness: 1,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: Text(
+                        "Welcome Back",
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
+                          fontFamily: "Sora",
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                  const VerticalSpace(10),
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: Text(
+                        "Sign in to continue",
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: textColorSecondary,
+                          fontFamily: "Sora",
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                  const VerticalSpace(40),
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: AppTextField(
+                        hintText: "Email",
+                        labelText: "Email",
+                        prefixIcon: const Icon(Icons.email_outlined),
+                        keyboardType: TextInputType.emailAddress,
+                        onChanged: state.onEmailChanged,
+                        validator: validateEmail,
+                      ),
+                    ),
+                  ),
+                  const VerticalSpace(20),
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: AppTextField(
+                        hintText: "Password",
+                        labelText: "Password",
+                        maxLines: 1,
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        isPassword: true,
+                        onChanged: state.onPasswordChanged,
+                        validator: validatePassword,
+                      ),
+                    ),
+                  ),
+                  const VerticalSpace(8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: FadeTransition(
+                      opacity: _fadeAnimation,
                       child: SlideTransition(
                         position: _slideAnimation,
-                        child: FadeTransition(
-                          opacity: _fadeAnimation,
+                        child: TextButton(
+                          onPressed: state.isLoading ? null : () {},
+                          // : () => state.handleForgotPassword(context),
                           child: Text(
-                            "or",
+                            'Forgot Password?',
                             style: TextStyle(
-                              color: textColorSecondary,
+                              color: primaryColor,
                               fontFamily: "Sora",
                             ),
                           ),
                         ),
                       ),
                     ),
-                    Expanded(
-                      child: Divider(
-                        color: textColorSecondary.withOpacity(0.3),
-                        thickness: 1,
+                  ),
+                  const VerticalSpace(40),
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: ElevatedButton(
+                        onPressed:
+                            state.isLoading
+                                ? null
+                                : () => state.handleLogin(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child:
+                            state.isLoading
+                                ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
+                                : const Text(
+                                  "Sign In",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: "Sora",
+                                  ),
+                                ),
                       ),
                     ),
-                  ],
-                ),
-                const VerticalSpace(20),
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: SlideTransition(
-                    position: _slideAnimation,
-                    child: OutlinedButton(
-                      onPressed: () {
-                        print('Continue with Google pressed');
-                      },
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        side: BorderSide(
+                  ),
+                  const VerticalSpace(20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Divider(
                           color: textColorSecondary.withOpacity(0.3),
+                          thickness: 1,
                         ),
                       ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: SlideTransition(
+                          position: _slideAnimation,
+                          child: FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: Text(
+                              "or",
+                              style: TextStyle(
+                                color: textColorSecondary,
+                                fontFamily: "Sora",
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Divider(
+                          color: textColorSecondary.withOpacity(0.3),
+                          thickness: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const VerticalSpace(20),
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: OutlinedButton.icon(
+                        onPressed: state.isLoading ? null : () {},
+                        // : () => state.handleGoogleSignIn(context),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          side: BorderSide(
+                            color: primaryColor.withOpacity(0.5),
+                          ),
+                        ),
+                        icon: Image.network(
+                          'https://www.google.com/favicon.ico',
+                          width: 24,
+                          height: 24,
+                        ),
+                        label: Text(
+                          'Continue with Google',
+                          style: TextStyle(
+                            color: textColor,
+                            fontFamily: "Sora",
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const VerticalSpace(20),
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Image.asset(
-                            'assets/images/google_logo.png',
-                            height: 24,
-                            width: 24,
-                          ),
-                          const SizedBox(width: 12),
-                          const Text(
-                            "Continue with Google",
+                          Text(
+                            "Don't have an account? ",
                             style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
+                              color: textColorSecondary,
                               fontFamily: "Sora",
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () => state.handleSignUp(context),
+                            child: Text(
+                              "Sign Up",
+                              style: TextStyle(
+                                color: primaryColor,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: "Sora",
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                ),
-
-                const VerticalSpace(20),
-                SlideTransition(
-                  position: _slideAnimation,
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Don't have an account? ",
-
-                          style: TextStyle(
-                            color: textColorSecondary,
-                            fontFamily: "Sora",
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            GoRouter.of(context).push(RouteName.signUp);
-                          },
-                          child: Text(
-                            "Sign Up",
-                            style: TextStyle(
-                              color: primaryColor,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: "Sora",
-                            ),
-                          ),
-                        ),
-                        // CustomButton(
-                        //   title: "Sign Up",
-                        //   onPressed: () {
-                        //     GoRouter.of(context).push(RouteName.signUp);
-                        //   },
-                        // ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
