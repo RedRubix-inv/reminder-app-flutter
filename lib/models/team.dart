@@ -1,17 +1,11 @@
-enum TeamRole { admin, member, viewer }
+enum TeamRole { admin, member, moderator }
 
 class TeamMember {
   final String email;
   final TeamRole role;
   final String? name;
-  final String? avatarUrl;
 
-  TeamMember({
-    required this.email,
-    required this.role,
-    this.name,
-    this.avatarUrl,
-  });
+  TeamMember({required this.email, required this.role, this.name});
 }
 
 enum ReminderFrequency { oneTime, multipleDates, weekday, weekend }
@@ -46,7 +40,7 @@ class Team {
   final String id;
   final String name;
   final String description;
-  final String avatarUrl;
+
   final List<TeamMember> members;
   final List<TeamReminder> reminders;
 
@@ -54,7 +48,7 @@ class Team {
     required this.id,
     required this.name,
     required this.description,
-    required this.avatarUrl,
+
     required this.members,
     this.reminders = const [],
   });

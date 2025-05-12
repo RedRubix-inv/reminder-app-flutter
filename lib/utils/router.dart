@@ -108,10 +108,10 @@ final router = GoRouter(
             index: _calculateSelectedIndex(state),
             items: const [
               Icon(LucideIcons.clipboardList, size: 28, color: Colors.white),
-              Icon(LucideIcons.users, size: 28, color: Colors.white),
+              Icon(LucideIcons.users2, size: 28, color: Colors.white),
               Icon(LucideIcons.bellPlus, size: 28, color: Colors.white),
               Icon(LucideIcons.calendar, size: 28, color: Colors.white),
-              Icon(LucideIcons.user, size: 28, color: Colors.white),
+              Icon(LucideIcons.user2, size: 28, color: Colors.white),
             ],
             onTap: (index) {
               _onItemTapped(index, context);

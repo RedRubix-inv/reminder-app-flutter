@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:reminder_app/pages/home/home_view.dart';
+import 'package:reminder_app/models/team.dart';
 import 'package:reminder_app/utils/spacing.dart';
 import 'package:reminder_app/utils/theme.dart';
 
@@ -35,25 +35,12 @@ class TeamMembersDialog extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // CircleAvatar(
-          //   radius: 24,
-          //   backgroundColor: primaryColor.withAlpha(50),
-          //   child: Text(
-          //     member.name[0].toUpperCase(),
-          //     style: TextStyle(
-          //       color: primaryColor,
-          //       fontSize: 14,
-          //       fontWeight: FontWeight.bold,
-          //     ),
-          //   ),
-          // ),
-          // const HorizontalSpace(12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  member.name,
+                  member.name ?? member.email.split('@')[0],
                   style: TextStyle(
                     color: textColor,
                     fontSize: 14,

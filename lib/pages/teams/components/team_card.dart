@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:reminder_app/models/team.dart';
 import 'package:reminder_app/pages/teams/components/team_management.dart';
-import 'package:reminder_app/pages/teams/team_reminders_view.dart';
+import 'package:reminder_app/utils/spacing.dart';
+import 'package:reminder_app/utils/theme.dart';
 
 class TeamCard extends StatelessWidget {
   final Team team;
@@ -39,45 +41,47 @@ class TeamCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                CircleAvatar(
-                  radius: 24,
-                  backgroundImage: AssetImage(team.avatarUrl),
-                  backgroundColor: Colors.grey[200],
-                ),
-                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        team.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        children: [
+                          Icon(LucideIcons.users2, color: textColor),
+                          const HorizontalSpace(4),
+                          Text(
+                            team.name,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        '${team.memberCount} members',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: primaryColor.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        child: Text(
+                          '${team.memberCount} Members',
+                          style: TextStyle(
+                            color: textColor,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
+
                 Row(
                   children: [
-                    IconButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => TeamRemindersView(team: team),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.notifications_outlined),
-                      tooltip: 'View Reminders',
-                      color: Colors.grey[600],
-                    ),
                     IconButton(
                       onPressed: () {
                         Navigator.push(
@@ -99,7 +103,7 @@ class TeamCard extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 team.description,
-                style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                style: TextStyle(color: textColorSecondary, fontSize: 14),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),

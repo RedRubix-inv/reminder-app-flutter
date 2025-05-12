@@ -4,7 +4,7 @@ import 'package:reminder_app/components/custom_appbar.dart';
 import 'package:reminder_app/components/delete_dialog/delete_dialog.dart';
 import 'package:reminder_app/components/show_toast.dart';
 import 'package:reminder_app/components/team_members_dialog/team_members_dialog.dart';
-import 'package:reminder_app/pages/home/home_view.dart';
+import 'package:reminder_app/models/team.dart';
 import 'package:reminder_app/utils/helpers.dart';
 import 'package:reminder_app/utils/spacing.dart';
 import 'package:reminder_app/utils/theme.dart';
