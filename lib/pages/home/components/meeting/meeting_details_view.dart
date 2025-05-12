@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:reminder_app/components/custom_appbar.dart';
-import 'package:reminder_app/pages/home/components/meeting_details.dart';
+import 'package:reminder_app/pages/home/components/meeting/meeting_details.dart';
 import 'package:reminder_app/utils/theme.dart';
 
 class MeetingDetailsView extends StatelessWidget {

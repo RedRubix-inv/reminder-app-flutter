@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:reminder_app/pages/home/meeting_details_view.dart';
+import 'package:reminder_app/pages/home/components/meeting/meeting_details_view.dart';
 import 'package:reminder_app/utils/helpers.dart';
+import 'package:reminder_app/utils/theme.dart';
 
 class MeetingCard extends StatelessWidget {
   final String title;
@@ -92,23 +93,23 @@ class MeetingCard extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
+                Icon(Icons.calendar_today, size: 16, color: textColor),
                 const SizedBox(width: 8),
                 Text(
                   formatDateTime(dateTime),
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: TextStyle(color: textColor),
                 ),
               ],
             ),
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.timer, size: 16, color: Colors.grey[600]),
+                Icon(Icons.timer, size: 16, color: textColor),
                 const SizedBox(width: 8),
                 Text(
                   getRemainingTime(dateTime),
                   style: TextStyle(
-                    color: Colors.grey[600],
+                    color: textColor,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -117,11 +118,11 @@ class MeetingCard extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                Icon(Icons.person, size: 16, color: Colors.grey[600]),
+                Icon(Icons.person, size: 16, color: textColor),
                 const SizedBox(width: 8),
                 Text(
                   'Created by: $createdBy',
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: TextStyle(color: textColor),
                 ),
               ],
             ),
