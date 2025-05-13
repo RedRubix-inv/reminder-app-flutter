@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:provider/provider.dart';
 import 'package:reminder_app/components/custom_appbar.dart';
 import 'package:reminder_app/models/team.dart';
 import 'package:reminder_app/pages/home/components/reminder/reminder_card.dart';
 import 'package:reminder_app/pages/home/components/reminder/reminder_details_view.dart';
+import 'package:reminder_app/pages/home/home_state.dart';
+import 'package:reminder_app/services/auth_service.dart';
 import 'package:reminder_app/utils/router.dart';
 import 'package:reminder_app/utils/spacing.dart';
 import 'package:reminder_app/utils/theme.dart';
@@ -34,6 +37,20 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (context) => HomeState(context.read<AuthService>()),
+      child: const _HomeViewContent(),
+    );
+  }
+}
+
+class _HomeViewContent extends StatelessWidget {
+  const _HomeViewContent();
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<HomeState>();
+
     final List<Reminder> reminders = [
       Reminder(
         title: 'Team Standup',
@@ -185,7 +202,9 @@ class HomeView extends StatelessWidget {
       appBar: CustomAppBar(
         displayMode: LeadingDisplayMode.avatarOnly,
         avatarImageUrl: 'assets/images/profile.png',
+        showNotification: true,
       ),
+
       body: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: getScreenWidth(context) * 0.04,
@@ -193,25 +212,15 @@ class HomeView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Text(
-                  'Hello,',
-                  style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.normal,
-                    color: textColor,
-                  ),
-                ),
-                Text(
-                  'Manish!',
-                  style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
-                  ),
-                ),
-              ],
+            Text(
+              state.firstName != null
+                  ? "Hello, ${state.firstName}!"
+                  : "Hello there!",
+              style: TextStyle(
+                fontSize: 40,
+                fontWeight: FontWeight.bold,
+                color: textColor,
+              ),
             ),
             const VerticalSpace(8),
             Text(

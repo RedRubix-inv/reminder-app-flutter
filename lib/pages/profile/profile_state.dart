@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:reminder_app/components/show_toast.dart';
 import 'package:reminder_app/services/auth_service.dart';
 import 'package:reminder_app/utils/router.dart';
 import 'package:toastification/toastification.dart';
@@ -19,12 +20,12 @@ class ProfileState extends ChangeNotifier {
 
       if (context.mounted) {
         // Show success message
-        toastification.show(
-          context: context,
+        showToast(
+          context,
           type: ToastificationType.success,
-          title: const Text('Success'),
-          description: const Text('Signed out successfully'),
-          autoCloseDuration: const Duration(seconds: 2),
+          title: 'Success',
+          description: 'Signed out successfully',
+          duration: const Duration(seconds: 3),
         );
 
         // Ensure we're redirected to login
@@ -35,12 +36,12 @@ class ProfileState extends ChangeNotifier {
       }
     } catch (e) {
       if (context.mounted) {
-        toastification.show(
-          context: context,
+        showToast(
+          context,
           type: ToastificationType.error,
-          title: const Text('Error'),
-          description: Text('Failed to sign out: ${e.toString()}'),
-          autoCloseDuration: const Duration(seconds: 3),
+          title: 'Error',
+          description: 'Failed to sign out: ${e.toString()}',
+          duration: const Duration(seconds: 6),
         );
       }
     }

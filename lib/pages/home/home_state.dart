@@ -1,22 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:state_view/state_view.dart';
-import 'home_view.dart';
-import 'home_events.dart';
-export 'home_events.dart';
+import 'package:reminder_app/services/auth_service.dart';
 
-class Home extends StateView<HomeState> {
-  Home({Key? key})
-      : super(
-          key: key,
-          stateBuilder: (context) => HomeState(context),
-          view: HomeView(),
-        );
-}
+class HomeState extends ChangeNotifier {
+  final AuthService _authService;
 
-class HomeState extends StateProvider<Home, HomeEvent> {
-  HomeState(super.context);
-  @override
-  void onEvent(HomeEvent event) {
-    return;
+  HomeState(this._authService);
+
+  String? get firstName {
+    final displayName = _authService.currentUser?.displayName;
+    if (displayName != null) {
+      return displayName.split(' ').first;
+    }
+    return null;
   }
 }
