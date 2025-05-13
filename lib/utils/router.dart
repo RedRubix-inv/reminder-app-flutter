@@ -19,6 +19,7 @@ import 'package:reminder_app/pages/tasks/tasks_view.dart';
 import 'package:reminder_app/pages/teams/components/team_management.dart';
 import 'package:reminder_app/pages/teams/teams_view.dart';
 import 'package:reminder_app/pages/test/test_view.dart';
+import 'package:reminder_app/services/app_state_service.dart';
 import 'package:reminder_app/services/auth_service.dart';
 import 'package:reminder_app/utils/theme.dart';
 
@@ -44,19 +45,29 @@ class RouteName {
 
 final router = GoRouter(
   initialLocation: RouteName.login,
-  redirect: (context, state) {
+  redirect: (context, state) async {
     final authService = Provider.of<AuthService>(context, listen: false);
     final isLoggedIn = authService.currentUser != null;
     final isAuthRoute =
         state.matchedLocation == RouteName.login ||
         state.matchedLocation == RouteName.signUp ||
         state.matchedLocation == RouteName.forgotPassword;
+    final isOnboardingRoute = state.matchedLocation == RouteName.onBoarding;
+
+    // Check if it's first launch
+    final isFirstLaunch = await AppStateService.isFirstLaunch();
 
     debugPrint(
-      'Router redirect - isLoggedIn: $isLoggedIn, isAuthRoute: $isAuthRoute, path: ${state.matchedLocation}',
+      'Router redirect - isLoggedIn: $isLoggedIn, isAuthRoute: $isAuthRoute, path: ${state.matchedLocation}, isFirstLaunch: $isFirstLaunch',
     );
 
-    if (!isLoggedIn && !isAuthRoute) {
+    // Show onboarding for first launch
+    if (isFirstLaunch && !isOnboardingRoute) {
+      debugPrint('Redirecting to onboarding - first launch');
+      return RouteName.onBoarding;
+    }
+
+    if (!isLoggedIn && !isAuthRoute && !isOnboardingRoute) {
       debugPrint('Redirecting to login - user not authenticated');
       return RouteName.login;
     }

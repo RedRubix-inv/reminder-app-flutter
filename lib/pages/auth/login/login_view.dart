@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:reminder_app/components/app_textfield.dart';
+import 'package:reminder_app/components/button.dart';
 import 'package:reminder_app/pages/auth/login/login_state.dart';
 import 'package:reminder_app/utils/spacing.dart';
 import 'package:reminder_app/utils/theme.dart';
@@ -102,7 +104,7 @@ class _LoginViewState extends State<LoginView>
                       child: AppTextField(
                         hintText: "Email",
                         labelText: "Email",
-                        prefixIcon: const Icon(Icons.email_outlined),
+                        prefixIcon: const Icon(LucideIcons.mail),
                         keyboardType: TextInputType.emailAddress,
                         onChanged: state.onEmailChanged,
                         validator: validateEmail,
@@ -118,7 +120,7 @@ class _LoginViewState extends State<LoginView>
                         hintText: "Password",
                         labelText: "Password",
                         maxLines: 1,
-                        prefixIcon: const Icon(Icons.lock_outline),
+                        prefixIcon: const Icon(LucideIcons.lock),
                         isPassword: true,
                         onChanged: state.onPasswordChanged,
                         validator: validatePassword,
@@ -138,7 +140,7 @@ class _LoginViewState extends State<LoginView>
                           child: Text(
                             'Forgot Password?',
                             style: TextStyle(
-                              color: primaryColor,
+                              color: textColor,
                               fontFamily: "Sora",
                             ),
                           ),
@@ -146,44 +148,18 @@ class _LoginViewState extends State<LoginView>
                       ),
                     ),
                   ),
-                  const VerticalSpace(40),
+                  const VerticalSpace(20),
                   FadeTransition(
                     opacity: _fadeAnimation,
                     child: SlideTransition(
                       position: _slideAnimation,
-                      child: ElevatedButton(
+                      child: CustomButton(
+                        title: "Sign In",
+                        isLoading: state.isLoading,
                         onPressed:
                             state.isLoading
                                 ? null
                                 : () => state.handleLogin(context),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryColor,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child:
-                            state.isLoading
-                                ? const SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
-                                    ),
-                                  ),
-                                )
-                                : const Text(
-                                  "Sign In",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: "Sora",
-                                  ),
-                                ),
                       ),
                     ),
                   ),

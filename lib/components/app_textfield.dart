@@ -87,7 +87,7 @@ class _AppTextFieldState extends State<AppTextField> {
           obscureText: widget.isPassword ? _obscureText : false,
           keyboardType: widget.keyboardType,
           style: const TextStyle(
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: FontWeight.w500,
             color: Colors.black87,
           ),
@@ -122,7 +122,7 @@ class _AppTextFieldState extends State<AppTextField> {
             hintStyle: Theme.of(context).textTheme.labelLarge!.copyWith(
               color: Colors.black38,
               fontWeight: FontWeight.normal,
-              fontSize: 18,
+              fontSize: 16,
             ),
             filled: true,
             fillColor: widget.fillColor ?? Colors.white,
