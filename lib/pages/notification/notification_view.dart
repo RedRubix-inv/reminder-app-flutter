@@ -132,6 +132,7 @@ class _NotificationViewState extends State<NotificationView> {
         displayMode: LeadingDisplayMode.backWithText,
         leadingText: 'Notifications',
         onNotificationPressed: () {},
+        showNotification: false,
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(

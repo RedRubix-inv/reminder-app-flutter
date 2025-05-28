@@ -163,6 +163,8 @@ class ReminderCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: textColor,
                               fontSize: 18,
@@ -199,6 +201,8 @@ class ReminderCard extends StatelessWidget {
               const VerticalSpace(8),
               Text(
                 description,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: textColorSecondary,
                   fontSize: 14,

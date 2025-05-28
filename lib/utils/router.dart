@@ -9,16 +9,21 @@ import 'package:reminder_app/pages/auth/login/login_state.dart';
 import 'package:reminder_app/pages/auth/login/login_view.dart';
 import 'package:reminder_app/pages/auth/sign_up/sign_up_state.dart';
 import 'package:reminder_app/pages/auth/sign_up/sign_up_view.dart';
+import 'package:reminder_app/pages/calendar/calendar_state.dart';
 import 'package:reminder_app/pages/calendar/calendar_view.dart';
-import 'package:reminder_app/pages/home/components/meeting/create_meeting_view.dart';
 import 'package:reminder_app/pages/home/components/reminder/create_reminder_view.dart';
+import 'package:reminder_app/pages/home/home_state.dart';
 import 'package:reminder_app/pages/home/home_view.dart';
+import 'package:reminder_app/pages/more/faq/faq_view.dart';
+import 'package:reminder_app/pages/more/help_support/help_support_view.dart';
+import 'package:reminder_app/pages/more/privacy_policy/privacy_policy_view.dart';
 import 'package:reminder_app/pages/notification/notification_view.dart';
 import 'package:reminder_app/pages/profile/profile_view.dart';
 import 'package:reminder_app/pages/tasks/tasks_view.dart';
 import 'package:reminder_app/pages/teams/components/team_management.dart';
 import 'package:reminder_app/pages/teams/teams_view.dart';
 import 'package:reminder_app/pages/test/test_view.dart';
+import 'package:reminder_app/services/app_state_service.dart';
 import 'package:reminder_app/services/auth_service.dart';
 import 'package:reminder_app/utils/theme.dart';
 
@@ -40,23 +45,51 @@ class RouteName {
   static const String teamManagement = '/team-management';
   static const String notifications = '/notifications';
   static const String test = '/test';
+  static const String faq = '/faq';
+  static const String privacyPolicy = '/privacy-policy';
+  static const String helpSupport = '/help-support';
 }
 
 final router = GoRouter(
-  initialLocation: RouteName.login,
-  redirect: (context, state) {
+  initialLocation: RouteName.splashScreen,
+  redirect: (context, state) async {
     final authService = Provider.of<AuthService>(context, listen: false);
     final isLoggedIn = authService.currentUser != null;
     final isAuthRoute =
         state.matchedLocation == RouteName.login ||
         state.matchedLocation == RouteName.signUp ||
         state.matchedLocation == RouteName.forgotPassword;
+    final isOnboardingRoute = state.matchedLocation == RouteName.onBoarding;
+    final isSplashRoute = state.matchedLocation == RouteName.splashScreen;
+
+    // Check if it's first launch
+    final isFirstLaunch = await AppStateService.isFirstLaunch();
 
     debugPrint(
-      'Router redirect - isLoggedIn: $isLoggedIn, isAuthRoute: $isAuthRoute, path: ${state.matchedLocation}',
+      'Router redirect - isLoggedIn: $isLoggedIn, isAuthRoute: $isAuthRoute, path: ${state.matchedLocation}, isFirstLaunch: $isFirstLaunch',
     );
 
-    if (!isLoggedIn && !isAuthRoute) {
+    // Handle splash screen
+    if (isSplashRoute) {
+      if (isFirstLaunch) {
+        debugPrint('Redirecting to onboarding - first launch');
+        return RouteName.onBoarding;
+      } else if (!isLoggedIn) {
+        debugPrint('Redirecting to login - not first launch and not logged in');
+        return RouteName.login;
+      } else {
+        debugPrint('Redirecting to home - not first launch and logged in');
+        return RouteName.home;
+      }
+    }
+
+    // Show onboarding for first launch
+    if (isFirstLaunch && !isOnboardingRoute) {
+      debugPrint('Redirecting to onboarding - first launch');
+      return RouteName.onBoarding;
+    }
+
+    if (!isLoggedIn && !isAuthRoute && !isOnboardingRoute) {
       debugPrint('Redirecting to login - user not authenticated');
       return RouteName.login;
     }
@@ -70,6 +103,12 @@ final router = GoRouter(
     return null;
   },
   routes: [
+    GoRoute(
+      path: RouteName.splashScreen,
+      builder:
+          (context, state) =>
+              const Scaffold(body: Center(child: CircularProgressIndicator())),
+    ),
     GoRoute(
       path: RouteName.login,
       builder:
@@ -100,10 +139,7 @@ final router = GoRouter(
       path: RouteName.onBoarding,
       builder: (context, state) => Onboarding(),
     ),
-    GoRoute(
-      path: RouteName.createMeeting,
-      builder: (context, state) => const CreateMeetingView(),
-    ),
+
     GoRoute(
       path: RouteName.teamManagement,
       builder: (context, state) {
@@ -123,28 +159,40 @@ final router = GoRouter(
       path: RouteName.test,
       builder: (context, state) => const TestView(),
     ),
+    GoRoute(path: RouteName.faq, builder: (context, state) => const FaqView()),
+    GoRoute(
+      path: RouteName.privacyPolicy,
+      builder: (context, state) => const PrivacyPolicyView(),
+    ),
+    GoRoute(
+      path: RouteName.helpSupport,
+      builder: (context, state) => const HelpSupportView(),
+    ),
     ShellRoute(
       builder: (context, state, child) {
-        return Scaffold(
-          body: child,
-          bottomNavigationBar: CurvedNavigationBar(
-            backgroundColor: Colors.transparent,
-            color: secondaryColor.withOpacity(0.8),
-            buttonBackgroundColor: secondaryColor.withOpacity(0.8),
-            height: 60,
-            animationDuration: const Duration(milliseconds: 500),
-            animationCurve: Curves.easeInOutCubicEmphasized,
-            index: _calculateSelectedIndex(state),
-            items: const [
-              Icon(LucideIcons.clipboardList, size: 28, color: Colors.white),
-              Icon(LucideIcons.users2, size: 28, color: Colors.white),
-              Icon(LucideIcons.bellPlus, size: 28, color: Colors.white),
-              Icon(LucideIcons.calendar, size: 28, color: Colors.white),
-              Icon(LucideIcons.user2, size: 28, color: Colors.white),
-            ],
-            onTap: (index) {
-              _onItemTapped(index, context);
-            },
+        return ChangeNotifierProvider.value(
+          value: HomeState(Provider.of<AuthService>(context, listen: false)),
+          child: Scaffold(
+            body: child,
+            bottomNavigationBar: CurvedNavigationBar(
+              backgroundColor: Colors.transparent,
+              color: secondaryColor.withOpacity(0.8),
+              buttonBackgroundColor: secondaryColor.withOpacity(0.8),
+              height: 60,
+              animationDuration: const Duration(milliseconds: 500),
+              animationCurve: Curves.easeInOutCubicEmphasized,
+              index: _calculateSelectedIndex(state),
+              items: const [
+                Icon(LucideIcons.clipboardList, size: 28, color: Colors.white),
+                Icon(LucideIcons.users2, size: 28, color: Colors.white),
+                Icon(LucideIcons.bellPlus, size: 28, color: Colors.white),
+                Icon(LucideIcons.calendar, size: 28, color: Colors.white),
+                Icon(LucideIcons.user2, size: 28, color: Colors.white),
+              ],
+              onTap: (index) {
+                _onItemTapped(index, context);
+              },
+            ),
           ),
         );
       },
@@ -163,7 +211,13 @@ final router = GoRouter(
         ),
         GoRoute(
           path: RouteName.calendar,
-          builder: (context, state) => const CalendarView(),
+          builder:
+              (context, state) => ChangeNotifierProvider.value(
+                value: CalendarState(
+                  Provider.of<HomeState>(context, listen: false),
+                ),
+                child: const CalendarView(),
+              ),
         ),
         GoRoute(
           path: RouteName.profile,

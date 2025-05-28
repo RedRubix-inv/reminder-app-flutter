@@ -6,6 +6,7 @@ ToastificationItem showToast(
   ToastificationType type = ToastificationType.success,
   String title = "Title",
   String description = "Description",
+  Duration? duration,
 }) {
   return toastification.show(
     context: context,
@@ -14,7 +15,7 @@ ToastificationItem showToast(
     title: Text(title),
     description: Text(description),
     alignment: Alignment.topCenter,
-    autoCloseDuration: const Duration(seconds: 6),
+    autoCloseDuration: duration ?? const Duration(seconds: 6),
     borderRadius: BorderRadius.circular(10),
     showProgressBar: true,
     dragToClose: true,

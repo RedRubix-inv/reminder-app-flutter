@@ -20,6 +20,11 @@ class AuthService extends ChangeNotifier {
     });
   }
 
+  // Get stored full name
+  String? getStoredFullName() {
+    return _currentUser?.displayName;
+  }
+
   // Sign in with email and password
   Future<UserCredential> signInWithEmailAndPassword(
     String email,
@@ -50,6 +55,7 @@ class AuthService extends ChangeNotifier {
   Future<UserCredential> registerWithEmailAndPassword(
     String email,
     String password,
+    String fullName,
   ) async {
     try {
       debugPrint('Attempting to register with email: $email');
@@ -57,6 +63,10 @@ class AuthService extends ChangeNotifier {
         email: email,
         password: password,
       );
+
+      // Update the user's display name
+      await credential.user?.updateDisplayName(fullName);
+
       debugPrint('Registration successful for: ${credential.user?.email}');
       _currentUser = credential.user;
       notifyListeners();
@@ -82,27 +92,55 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  // Handle Firebase Auth exceptions
-  String _handleAuthException(FirebaseAuthException e) {
+  // Handle Firebase Auth exceptions with detailed messages and titles
+  AuthError _handleAuthException(FirebaseAuthException e) {
     switch (e.code) {
       case 'user-not-found':
-        return 'No user found with this email.';
-      case 'wrong-password':
-        return 'Wrong password provided.';
+        return AuthError(
+          'Account Not Found',
+          'No account exists with this email.',
+        );
+      case 'invalid-credential':
+        return AuthError('Authentication Failed', 'Invalid email or password.');
+
       case 'email-already-in-use':
-        return 'An account already exists with this email.';
-      case 'weak-password':
-        return 'The password provided is too weak.';
+        return AuthError(
+          'Email In Use',
+          'An account already exists with this email.',
+        );
+
       case 'invalid-email':
-        return 'The email address is not valid.';
+        return AuthError(
+          'Invalid Email',
+          'The email address format is invalid',
+        );
       case 'user-disabled':
-        return 'This user account has been disabled.';
+        return AuthError('Account Disabled', 'Your account has been disabled.');
       case 'too-many-requests':
-        return 'Too many login attempts. Please try again later.';
+        return AuthError(
+          'Access Blocked',
+          'Access temporarily blocked due to many failed attempts.',
+        );
+      case 'network-request-failed':
+        return AuthError(
+          'Network Error',
+          'Please check your internet connection',
+        );
       default:
-        return e.message ?? 'An error occurred. Please try again.';
+        return AuthError('Error', e.message ?? 'An unexpected error occurred.');
     }
   }
+}
 
-  // Rest of the methods remain the same...
+// Class to represent authentication errors with title and message
+class AuthError {
+  final String title;
+  final String message;
+
+  AuthError(this.title, this.message);
+
+  @override
+  String toString() {
+    return message;
+  }
 }

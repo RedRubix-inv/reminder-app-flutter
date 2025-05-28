@@ -154,6 +154,7 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
       appBar: CustomAppBar(
         displayMode: LeadingDisplayMode.backWithText,
         leadingText: 'Create New Team',
+        showNotification: false,
       ),
       body: SingleChildScrollView(
         child: Padding(

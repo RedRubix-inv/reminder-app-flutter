@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:reminder_app/services/app_state_service.dart';
 import 'package:state_view/state_view.dart';
 
 import '../../utils/router.dart';
@@ -29,19 +30,17 @@ class OnboardingState extends StateProvider<Onboarding, OnboardingEvent> {
 
   @override
   void onEvent(OnboardingEvent event) {
-    if (event is OnFinalPage) {
-      GoRouter.of(context).pushReplacement(RouteName.login);
-      return;
-    }
-
     if (event is OnSetPage) {
       pageController.animateToPage(
         event.page,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.ease,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
       );
-      notifyListeners();
+    } else if (event is OnFinalPage) {
+      // Mark first launch complete and navigate to login
+      AppStateService.setFirstLaunchComplete().then((_) {
+        context.go(RouteName.signUp);
+      });
     }
-    return;
   }
 }

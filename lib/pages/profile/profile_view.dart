@@ -137,7 +137,7 @@ class _ProfileViewContent extends StatelessWidget {
                             ),
                             _buildMenuItem(
                               icon: Icons.star_outline,
-                              title: 'Standard',
+                              title: 'Basic Plan',
                               onTap: () {},
                             ),
                           ],
@@ -188,7 +188,11 @@ class _ProfileViewContent extends StatelessWidget {
                             _buildMenuItem(
                               icon: CupertinoIcons.bell,
                               title: 'Notifications',
-                              onTap: () {},
+                              onTap: () {
+                                GoRouter.of(
+                                  context,
+                                ).push(RouteName.notifications);
+                              },
                             ),
                             Divider(
                               color: primaryColor.withOpacity(0.1),
@@ -208,9 +212,26 @@ class _ProfileViewContent extends StatelessWidget {
                               endIndent: 16,
                             ),
                             _buildMenuItem(
-                              icon: Icons.language_outlined,
-                              title: 'Language',
-                              onTap: () {},
+                              icon: Icons.chat_bubble,
+                              title: 'FAQ',
+                              onTap: () {
+                                GoRouter.of(context).push(RouteName.faq);
+                              },
+                            ),
+                            Divider(
+                              color: primaryColor.withOpacity(0.1),
+                              height: 1,
+                              indent: 16,
+                              endIndent: 16,
+                            ),
+                            _buildMenuItem(
+                              icon: Icons.privacy_tip_outlined,
+                              title: 'Privacy Policy',
+                              onTap: () {
+                                GoRouter.of(
+                                  context,
+                                ).push(RouteName.privacyPolicy);
+                              },
                             ),
                             Divider(
                               color: primaryColor.withOpacity(0.1),

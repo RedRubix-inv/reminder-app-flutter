@@ -5,7 +5,7 @@ import 'package:reminder_app/components/appbar_backbutton.dart';
 import 'package:reminder_app/utils/router.dart';
 import 'package:reminder_app/utils/theme.dart';
 
-enum LeadingDisplayMode { avatarOnly, backWithText }
+enum LeadingDisplayMode { avatarOnly, backWithText, backButton, title }
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final LeadingDisplayMode displayMode;
@@ -28,40 +28,29 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     Widget? leadingWidget;
-    Widget? titleWidget;
 
-    switch (displayMode) {
-      case LeadingDisplayMode.avatarOnly:
-        leadingWidget =
-            avatarImageUrl != null
-                ? Padding(
-                  padding: const EdgeInsets.only(left: 16.0),
-                  child: CircleAvatar(
-                    radius: 20,
-                    backgroundImage: AssetImage(avatarImageUrl!),
-                    backgroundColor: Colors.grey.shade200,
-                  ),
-                )
-                : null;
-        break;
-      case LeadingDisplayMode.backWithText:
-        leadingWidget = appBarBackButton(context);
-        titleWidget =
-            leadingText != null
-                ? Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: Text(
-                    leadingText!,
-                    style: const TextStyle(
-                      color: textColor,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: "Sora",
-                    ),
-                  ),
-                )
-                : null;
-        break;
+    // Setup leading widget based on display mode
+    if (displayMode == LeadingDisplayMode.avatarOnly) {
+      leadingWidget =
+          avatarImageUrl != null
+              ? Padding(
+                padding: const EdgeInsets.only(left: 16.0),
+                child: CircleAvatar(
+                  radius: 20,
+                  backgroundImage: AssetImage(avatarImageUrl!),
+                  backgroundColor: Colors.grey.shade200,
+                ),
+              )
+              : null;
+    } else if (displayMode == LeadingDisplayMode.backButton) {
+      // Use the appBarBackButton directly as the leading widget
+      leadingWidget = appBarBackButton(context, onPressed: onBackPressed);
+    } else if (displayMode == LeadingDisplayMode.backWithText) {
+      // For backWithText mode, use the backButton as the leading widget
+      leadingWidget = appBarBackButton(context, onPressed: onBackPressed);
+    } else {
+      // For avatarOnly and title modes, leadingWidget is handled separately or null
+      leadingWidget = null;
     }
 
     return Container(
@@ -73,8 +62,34 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       child: AppBar(
+        // Set leading widget based on display mode
         leading: leadingWidget,
-        title: titleWidget != null ? Center(child: titleWidget) : null,
+        automaticallyImplyLeading: false, // Don't automatically add back button
+        // For backWithText mode, create a layout that has the back button on the left and centered text
+        title:
+            (displayMode == LeadingDisplayMode.backWithText ||
+                        displayMode == LeadingDisplayMode.title) &&
+                    leadingText != null
+                ? displayMode == LeadingDisplayMode.backWithText
+                    ? Text(
+                      leadingText!,
+                      style: const TextStyle(
+                        color: textColor,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: "Sora",
+                      ),
+                    )
+                    : Text(
+                      leadingText!,
+                      style: const TextStyle(
+                        color: textColor,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: "Sora",
+                      ),
+                    )
+                : null,
         centerTitle: true,
         actions: [
           if (showNotification)

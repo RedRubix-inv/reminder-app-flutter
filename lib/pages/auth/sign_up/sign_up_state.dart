@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:reminder_app/components/show_toast.dart';
+import 'package:reminder_app/services/api-service/base_http_service.dart';
+import 'package:reminder_app/services/api-service/user_service.dart';
 import 'package:reminder_app/services/auth_service.dart';
 import 'package:reminder_app/utils/router.dart';
 import 'package:toastification/toastification.dart';
 
 class SignUpState extends ChangeNotifier {
   final AuthService _authService;
+  final UserService _userService;
   final formKey = GlobalKey<FormState>();
 
-  SignUpState(this._authService) {
+  SignUpState(this._authService) : _userService = UserService() {
     // Listen to auth state changes
     _authService.authStateChanges.listen((user) {
       if (user != null) {
@@ -71,23 +75,31 @@ class SignUpState extends ChangeNotifier {
       final credential = await _authService.registerWithEmailAndPassword(
         _email!.trim(),
         _password!,
+        _fullName!.trim(),
       );
 
       // Update user profile with full name
       if (credential.user != null) {
-        await credential.user!.updateDisplayName(_fullName);
+        // Store user data in your API
+        final response = await _userService.createUser(
+          userId: credential.user!.uid,
+          name: _fullName!.trim(),
+        );
+
+        if (response is ErrorResponse) {
+          throw Exception(
+            response.data['message'] ?? 'Failed to store user data',
+          );
+        }
 
         // Show success message
         if (context.mounted) {
-          toastification.show(
-            context: context,
+          showToast(
+            context,
             type: ToastificationType.success,
-            title: const Text('Success'),
-            description: const Text('Account created successfully!'),
-            autoCloseDuration: const Duration(seconds: 3),
-            alignment: Alignment.topCenter,
-            margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            title: "Success",
+            description: 'Account created successfully!',
+            duration: const Duration(seconds: 3),
           );
 
           // Navigate to home page after a short delay to show the toast
@@ -100,15 +112,12 @@ class SignUpState extends ChangeNotifier {
     } catch (e) {
       // Show error message
       if (context.mounted) {
-        toastification.show(
-          context: context,
+        showToast(
+          context,
           type: ToastificationType.error,
-          title: const Text('Sign Up Failed'),
-          description: Text(e.toString()),
-          autoCloseDuration: const Duration(seconds: 3),
-          alignment: Alignment.topCenter,
-          margin: const EdgeInsets.all(16),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          title: 'Sign Up Failed',
+          description: e.toString(),
+          duration: const Duration(seconds: 3),
         );
       }
     } finally {

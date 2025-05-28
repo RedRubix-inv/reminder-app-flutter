@@ -1,190 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:provider/provider.dart';
 import 'package:reminder_app/components/custom_appbar.dart';
-import 'package:reminder_app/models/team.dart';
 import 'package:reminder_app/pages/home/components/reminder/reminder_card.dart';
 import 'package:reminder_app/pages/home/components/reminder/reminder_details_view.dart';
+import 'package:reminder_app/pages/home/home_state.dart';
 import 'package:reminder_app/utils/router.dart';
 import 'package:reminder_app/utils/spacing.dart';
 import 'package:reminder_app/utils/theme.dart';
-
-class Reminder {
-  final String title;
-  final String description;
-  final TimeOfDay time;
-  final List<DateTime> dates;
-  final String frequency;
-  final String type;
-  final List<TeamMember> teamMembers;
-
-  Reminder({
-    required this.title,
-    required this.description,
-    required this.time,
-    required this.dates,
-    required this.frequency,
-    required this.type,
-    this.teamMembers = const [],
-  });
-}
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final List<Reminder> reminders = [
-      Reminder(
-        title: 'Team Standup',
-        description: 'Daily team sync to discuss progress and blockers',
-        time: const TimeOfDay(hour: 10, minute: 0),
-        dates: [
-          DateTime.now().add(const Duration(days: 1)),
-          DateTime.now().add(const Duration(days: 2)),
-          DateTime.now().add(const Duration(days: 3)),
-        ],
-        frequency: 'Weekday (Mon-Fri)',
-        type: 'team',
-        teamMembers: [
-          TeamMember(
-            name: 'Manish Maharjan',
-            email: 'manish.maharjan@example.com',
-            role: TeamRole.admin,
-          ),
-          TeamMember(
-            name: 'John Doe',
-            email: 'john.doe@example.com',
-            role: TeamRole.moderator,
-          ),
-          TeamMember(
-            name: 'Jane Smith',
-            email: 'jane.smith@example.com',
-            role: TeamRole.member,
-          ),
-          TeamMember(
-            name: 'Bhavudipu',
-            email: 'bhavudipu@example.com',
-            role: TeamRole.member,
-          ),
-          TeamMember(
-            name: 'Jane Smith',
-            email: 'jane.smith@example.com',
-            role: TeamRole.member,
-          ),
-          TeamMember(
-            name: 'Jane Smith',
-            email: 'jane.smith@example.com',
-            role: TeamRole.member,
-          ),
-          TeamMember(
-            name: 'Jane Smith',
-            email: 'jane.smith@example.com',
-            role: TeamRole.member,
-          ),
-          TeamMember(
-            name: 'Jane Smith',
-            email: 'jane.smith@example.com',
-            role: TeamRole.member,
-          ),
-        ],
-      ),
-      Reminder(
-        title: 'Project Review',
-        description: 'Weekly project status review with stakeholders',
-        time: const TimeOfDay(hour: 14, minute: 30),
-        dates: [DateTime.now().subtract(const Duration(days: 5))],
-        frequency: 'One-time',
-        type: 'personal',
-      ),
-      Reminder(
-        title: 'Gym Session',
-        description: 'Regular workout session',
-        time: const TimeOfDay(hour: 18, minute: 0),
-        dates: [
-          DateTime.now().subtract(const Duration(days: 1)),
-          DateTime.now().add(const Duration(days: 3)),
-          DateTime.now().add(const Duration(days: 5)),
-          DateTime.now().add(const Duration(days: 7)),
-          DateTime.now().add(const Duration(days: 9)),
-          DateTime.now().add(const Duration(days: 11)),
-          DateTime.now().add(const Duration(days: 13)),
-          DateTime.now().add(const Duration(days: 15)),
-          DateTime.now().add(const Duration(days: 17)),
-          DateTime.now().add(const Duration(days: 19)),
-          DateTime.now().add(const Duration(days: 21)),
-        ],
-        frequency: 'Multiple Dates',
-        type: 'personal',
-      ),
-      Reminder(
-        title: 'Weekend Planning Of MAIDAAN',
-        description: 'Plan activities for the weekend',
-        time: const TimeOfDay(hour: 11, minute: 0),
-        dates: [
-          DateTime.now().add(const Duration(days: 6)),
-          DateTime.now().add(const Duration(days: 7)),
-        ],
-        frequency: 'Weekend (Sat-Sun)',
-        type: 'team',
-        teamMembers: [
-          TeamMember(
-            name: 'Manish Maharjan',
-            email: 'manish.maharjan@example.com',
-            role: TeamRole.admin,
-          ),
-          TeamMember(
-            name: 'John Doe',
-            email: 'john.doe@example.com',
-            role: TeamRole.moderator,
-          ),
-          TeamMember(
-            name: 'Jane Smith',
-            email: 'jane.smith@example.com',
-            role: TeamRole.member,
-          ),
-        ],
-      ),
-      Reminder(
-        title: 'Client Call',
-        description: 'Important client meeting to discuss project requirements',
-        time: const TimeOfDay(hour: 15, minute: 0),
-        dates: [DateTime.now().add(const Duration(days: 2))],
-        frequency: 'One-time',
-        type: 'personal',
-      ),
-      Reminder(
-        title: 'Team Standup',
-        description: 'Daily team sync to discuss progress and blockers',
-        time: const TimeOfDay(hour: 10, minute: 0),
-        dates: [DateTime.now().add(const Duration(days: 1))],
-        frequency: 'Weekday (Mon-Fri)',
-        type: 'team',
-        teamMembers: [
-          TeamMember(
-            name: 'Manish Maharjan',
-            email: 'manish.maharjan@example.com',
-            role: TeamRole.admin,
-          ),
-          TeamMember(
-            name: 'John Doe',
-            email: 'john.doe@example.com',
-            role: TeamRole.moderator,
-          ),
-          TeamMember(
-            name: 'Jane Smith',
-            email: 'jane.smith@example.com',
-            role: TeamRole.member,
-          ),
-        ],
-      ),
-    ];
+    final state = context.watch<HomeState>();
 
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: CustomAppBar(
         displayMode: LeadingDisplayMode.avatarOnly,
         avatarImageUrl: 'assets/images/profile.png',
+        showNotification: true,
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(
@@ -193,25 +31,15 @@ class HomeView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Text(
-                  'Hello,',
-                  style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.normal,
-                    color: textColor,
-                  ),
-                ),
-                Text(
-                  'Manish!',
-                  style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
-                  ),
-                ),
-              ],
+            Text(
+              state.firstName != null
+                  ? "Hello, ${state.firstName}!"
+                  : "Hello there!",
+              style: TextStyle(
+                fontSize: 40,
+                fontWeight: FontWeight.bold,
+                color: textColor,
+              ),
             ),
             const VerticalSpace(8),
             Text(
@@ -223,7 +51,7 @@ class HomeView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Upcoming Reminders (${reminders.length})',
+                  'Upcoming Reminders (${state.events.length})',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -243,45 +71,170 @@ class HomeView extends StatelessWidget {
                 ),
               ],
             ),
-            const VerticalSpace(8),
-            Expanded(
-              child: ListView.builder(
-                itemCount: reminders.length,
-                itemBuilder: (context, index) {
-                  final reminder = reminders[index];
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: ReminderCard(
-                      title: reminder.title,
-                      description: reminder.description,
-                      time: reminder.time,
-                      dates: reminder.dates,
-                      frequency: reminder.frequency,
-                      type: reminder.type,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) => ReminderDetailsView(
-                                  title: reminder.title,
-                                  description: reminder.description,
-                                  time: reminder.time,
-                                  dates: reminder.dates,
-                                  frequency: reminder.frequency,
-                                  teamMembers: reminder.teamMembers,
-                                ),
+            const VerticalSpace(16),
+            if (state.isLoading)
+              const Center(child: CircularProgressIndicator())
+            else if (state.error != null)
+              Center(
+                child: Text(state.error!, style: TextStyle(color: Colors.red)),
+              )
+            else if (state.events.isEmpty)
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        LucideIcons.bellOff,
+                        size: 64,
+                        color: textColorSecondary,
+                      ),
+                      const VerticalSpace(16),
+                      Text(
+                        'No reminders yet',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
+                        ),
+                      ),
+                      const VerticalSpace(8),
+                      Text(
+                        'Create your first reminder to get started',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: textColorSecondary,
+                        ),
+                      ),
+                      const VerticalSpace(24),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          context.push(RouteName.createReminder);
+                        },
+                        icon: const Icon(LucideIcons.bellPlus),
+                        label: const Text('Create Reminder'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
                           ),
-                        );
-                      },
-                    ),
-                  );
-                },
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    final state = context.read<HomeState>();
+                    await state.loadEvents(forceRefresh: true);
+                  },
+                  child: ListView.builder(
+                    itemCount: state.events.length,
+                    itemBuilder: (context, index) {
+                      final event = state.events[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: ReminderCard(
+                          title: event['title'] ?? '',
+                          description: event['description'] ?? '',
+                          time: _parseTimeOfDay(event['time'] ?? '00:00'),
+                          dates: _parseDates(
+                            event['start_date'],
+                            event['end_date'],
+                            event['selected_days'],
+                          ),
+                          frequency: event['frequency'] ?? '',
+                          type: 'personal',
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => ReminderDetailsView(
+                                      title: event['title'] ?? '',
+                                      description: event['description'] ?? '',
+                                      time: _parseTimeOfDay(
+                                        event['time'] ?? '00:00',
+                                      ),
+                                      dates: _parseDates(
+                                        event['start_date'],
+                                        event['end_date'],
+                                        event['selected_days'],
+                                      ),
+                                      frequency: event['frequency'] ?? '',
+                                      teamMembers: const [],
+                                    ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ),
-            ),
           ],
         ),
       ),
     );
+  }
+
+  TimeOfDay _parseTimeOfDay(String time) {
+    final parts = time.split(':');
+    return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+  }
+
+  List<DateTime> _parseDates(
+    String? startDate,
+    String? endDate,
+    List<dynamic>? selectedDays,
+  ) {
+    if (startDate == null || endDate == null) return [];
+
+    final start = DateTime.parse(startDate);
+    final end = DateTime.parse(endDate);
+    final days = selectedDays?.cast<String>() ?? [];
+
+    List<DateTime> dates = [];
+    DateTime current = start;
+
+    while (current.isBefore(end) || current.isAtSameMomentAs(end)) {
+      final dayName = _getDayName(current.weekday);
+      if (days.contains(dayName)) {
+        dates.add(current);
+      }
+      current = current.add(const Duration(days: 1));
+    }
+
+    return dates;
+  }
+
+  String _getDayName(int weekday) {
+    switch (weekday) {
+      case DateTime.monday:
+        return 'Monday';
+      case DateTime.tuesday:
+        return 'Tuesday';
+      case DateTime.wednesday:
+        return 'Wednesday';
+      case DateTime.thursday:
+        return 'Thursday';
+      case DateTime.friday:
+        return 'Friday';
+      case DateTime.saturday:
+        return 'Saturday';
+      case DateTime.sunday:
+        return 'Sunday';
+      default:
+        return '';
+    }
   }
 }

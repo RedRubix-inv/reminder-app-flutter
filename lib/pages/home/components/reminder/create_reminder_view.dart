@@ -3,16 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:provider/provider.dart';
 import 'package:reminder_app/components/app_textarea.dart';
 import 'package:reminder_app/components/app_textfield.dart';
 import 'package:reminder_app/components/button.dart';
 import 'package:reminder_app/components/custom_appbar.dart';
 import 'package:reminder_app/components/show_toast.dart';
+import 'package:reminder_app/services/auth_service.dart';
 import 'package:reminder_app/utils/helpers.dart';
-import 'package:reminder_app/utils/router.dart';
 import 'package:reminder_app/utils/spacing.dart';
 import 'package:reminder_app/utils/theme.dart';
 import 'package:toastification/toastification.dart';
+
+import '../../home_state.dart';
+import 'create_reminder_state.dart';
 
 enum ReminderFrequency { daily, oneTime, multipleDates, weekday, weekend }
 
@@ -551,277 +555,432 @@ class _CreateReminderViewState extends State<CreateReminderView> {
     print('======================\n');
   }
 
+  String _getDayName(int weekday) {
+    switch (weekday) {
+      case DateTime.monday:
+        return 'Monday';
+      case DateTime.tuesday:
+        return 'Tuesday';
+      case DateTime.wednesday:
+        return 'Wednesday';
+      case DateTime.thursday:
+        return 'Thursday';
+      case DateTime.friday:
+        return 'Friday';
+      case DateTime.saturday:
+        return 'Saturday';
+      case DateTime.sunday:
+        return 'Sunday';
+      default:
+        return '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      appBar: CustomAppBar(
-        displayMode: LeadingDisplayMode.backWithText,
-        leadingText: 'Create Reminder',
-        onNotificationPressed: () {},
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AppTextField(
-                hintText: 'Reminder Title',
-                initialValue: _titleController.text,
-                onChanged: (value) {
-                  _titleController.text = value;
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a reminder title';
-                  }
-                  return null;
-                },
-              ),
-              const VerticalSpace(16),
-              AppTextArea(
-                hintText: 'Reminder Description',
-                labelText: 'Reminder Description',
-                onChanged: (value) {
-                  _descriptionController.text = value;
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a reminder description';
-                  }
-                  return null;
-                },
-                maxLength: 200,
-                maxLines: 6,
-                minLines: 2,
-              ),
-              const VerticalSpace(16),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => _selectTime(context),
-
-                      icon: const Icon(LucideIcons.clock, color: textColor),
-                      label: Text(
-                        // '${_selectedTime.hour}:${_selectedTime.minute}'
-                        'Selected Time: ${_selectedTime.format(context)}',
-                        style: TextStyle(
-                          color: textColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: 'Sora',
-                        ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const VerticalSpace(16),
-              DropdownButtonFormField<ReminderFrequency>(
-                value: _selectedFrequency,
-                decoration: InputDecoration(
-                  labelText: 'Reminder Frequency',
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: secondaryColor.withOpacity(0.2),
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  // border: OutlineInputBorder(),
-                ),
-                items:
-                    ReminderFrequency.values.map((frequency) {
-                      String label;
-                      switch (frequency) {
-                        case ReminderFrequency.daily:
-                          label = 'Daily';
-                          break;
-                        case ReminderFrequency.oneTime:
-                          label = 'One-time';
-                          break;
-                        case ReminderFrequency.multipleDates:
-                          label = 'Multiple Dates';
-                          break;
-                        case ReminderFrequency.weekday:
-                          label = 'Weekday (Mon-Fri)';
-                          break;
-                        case ReminderFrequency.weekend:
-                          label = 'Weekend (Sat-Sun)';
-                          break;
-                      }
-                      return DropdownMenuItem<ReminderFrequency>(
-                        value: frequency,
-                        child: Text(label),
-                      );
-                    }).toList(),
-                onChanged: (ReminderFrequency? newValue) {
-                  if (newValue != null && newValue != _selectedFrequency) {
-                    setState(() {
-                      _selectedFrequency = newValue;
-                      _selectedDates.clear();
-                      _selectedWeekDays.fillRange(0, 7, false);
-                      final now = DateTime.now();
-                      final today = DateTime(now.year, now.month, now.day);
-
-                      switch (newValue) {
-                        case ReminderFrequency.oneTime:
-                        case ReminderFrequency.multipleDates:
-                          _selectedDate = today;
-                          break;
-                        case ReminderFrequency.daily:
-                          _selectedDate = today;
-                          // Generate dates for the next 30 days
-                          _selectedDates.clear();
-                          for (int i = 0; i < 30; i++) {
-                            _selectedDates.add(today.add(Duration(days: i)));
-                          }
-
-                          break;
-                        case ReminderFrequency.weekday:
-                          _selectedWeekDays.fillRange(0, 5, true); // Mon-Fri
-                          _selectedDate =
-                              now.weekday <= 5
-                                  ? today
-                                  : DateTime(
-                                    now.year,
-                                    now.month,
-                                    now.day + (8 - now.weekday),
-                                  );
-                          // Generate dates for the next 30 weekdays
-                          _selectedDates.clear();
-                          DateTime weekdayDate = _selectedDate;
-                          int weekdayCount = 0;
-                          while (weekdayCount < 30) {
-                            if (weekdayDate.weekday <= 5) {
-                              // Only add weekdays (Mon-Fri)
-                              _selectedDates.add(
-                                DateTime(
-                                  weekdayDate.year,
-                                  weekdayDate.month,
-                                  weekdayDate.day,
-                                ),
-                              );
-                              weekdayCount++;
-                            }
-                            weekdayDate = weekdayDate.add(
-                              const Duration(days: 1),
-                            );
-                          }
-                          break;
-                        case ReminderFrequency.weekend:
-                          _selectedWeekDays[5] = true; // Sat
-                          _selectedWeekDays[6] = true; // Sun
-                          _selectedDate =
-                              now.weekday >= 6
-                                  ? today
-                                  : DateTime(
-                                    now.year,
-                                    now.month,
-                                    now.day + (6 - now.weekday),
-                                  );
-                          // Generate dates for the next 30 weekends
-                          _selectedDates.clear();
-                          DateTime weekendDate = _selectedDate;
-                          int weekendCount = 0;
-                          while (weekendCount < 30) {
-                            if (weekendDate.weekday >= 6) {
-                              // Only add weekends (Sat-Sun)
-                              _selectedDates.add(
-                                DateTime(
-                                  weekendDate.year,
-                                  weekendDate.month,
-                                  weekendDate.day,
-                                ),
-                              );
-                              weekendCount++;
-                            }
-                            weekendDate = weekendDate.add(
-                              const Duration(days: 1),
-                            );
-                          }
-                          break;
-                      }
-                      _datePickerController.animateToDate(_selectedDate);
-                    });
-                  }
-                },
-              ),
-              const VerticalSpace(16),
-              _buildFrequencySpecificInput(),
-              const VerticalSpace(32),
-              CustomButton(
-                title: 'Create Reminder',
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    bool isValid = true;
-                    String? errorMessage;
-
-                    // Validate _selectedDate is not in the past for oneTime
-                    final today = DateTime.now();
-                    final normalizedToday = DateTime(
-                      today.year,
-                      today.month,
-                      today.day,
-                    );
-                    if (_selectedFrequency == ReminderFrequency.oneTime &&
-                        _selectedDate.isBefore(normalizedToday)) {
-                      isValid = false;
-                      errorMessage = 'Selected date cannot be in the past';
-                    }
-
-                    // Validate frequency-specific inputs
-                    switch (_selectedFrequency) {
-                      case ReminderFrequency.multipleDates:
-                      case ReminderFrequency.weekday:
-                      case ReminderFrequency.weekend:
-                      case ReminderFrequency.daily:
-                        if (_selectedDates.isEmpty) {
-                          isValid = false;
-                          errorMessage = 'Please select at least one date';
-                        } else if (_selectedDates.any(
-                          (date) => date.isBefore(normalizedToday),
-                        )) {
-                          isValid = false;
-                          errorMessage = 'Selected dates cannot be in the past';
-                        }
-                        break;
-                      default:
-                        break;
-                    }
-
-                    if (!isValid) {
-                      showToast(
-                        context,
-                        type: ToastificationType.error,
-                        title: 'Invalid Input',
-                        description: errorMessage!,
-                      );
-                      return;
-                    }
-
-                    _printReminderDetails();
-
-                    showToast(
-                      context,
-                      type: ToastificationType.success,
-                      title: 'Reminder Created!',
-                      description:
-                          'Reminder ${_titleController.text} created successfully',
-                    );
-                    GoRouter.of(context).go(RouteName.home);
-                  }
-                },
-              ),
-            ],
+    return ChangeNotifierProvider(
+      create:
+          (context) => CreateReminderState(
+            Provider.of<AuthService>(context, listen: false),
           ),
+      child: Scaffold(
+        backgroundColor: backgroundColor,
+        appBar: CustomAppBar(
+          displayMode: LeadingDisplayMode.backWithText,
+          leadingText: 'Create Reminder',
+          onNotificationPressed: () {},
+          showNotification: false,
+        ),
+        body: Consumer<CreateReminderState>(
+          builder: (context, state, child) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AppTextField(
+                      hintText: 'Reminder Title',
+                      initialValue: _titleController.text,
+                      onChanged: (value) {
+                        _titleController.text = value;
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a reminder title';
+                        }
+                        return null;
+                      },
+                    ),
+                    const VerticalSpace(16),
+                    AppTextArea(
+                      hintText: 'Reminder Description',
+                      labelText: 'Reminder Description',
+                      onChanged: (value) {
+                        _descriptionController.text = value;
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a reminder description';
+                        }
+                        return null;
+                      },
+                      maxLength: 200,
+                      maxLines: 6,
+                      minLines: 2,
+                    ),
+                    const VerticalSpace(16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => _selectTime(context),
+
+                            icon: const Icon(
+                              LucideIcons.clock,
+                              color: textColor,
+                            ),
+                            label: Text(
+                              // '${_selectedTime.hour}:${_selectedTime.minute}'
+                              'Selected Time: ${_selectedTime.format(context)}',
+                              style: TextStyle(
+                                color: textColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                fontFamily: 'Sora',
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 20),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const VerticalSpace(16),
+                    DropdownButtonFormField<ReminderFrequency>(
+                      value: _selectedFrequency,
+                      decoration: InputDecoration(
+                        labelText: 'Reminder Frequency',
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: secondaryColor.withOpacity(0.2),
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        // border: OutlineInputBorder(),
+                      ),
+                      items:
+                          ReminderFrequency.values.map((frequency) {
+                            String label;
+                            switch (frequency) {
+                              case ReminderFrequency.daily:
+                                label = 'Daily';
+                                break;
+                              case ReminderFrequency.oneTime:
+                                label = 'One-time';
+                                break;
+                              case ReminderFrequency.multipleDates:
+                                label = 'Multiple Dates';
+                                break;
+                              case ReminderFrequency.weekday:
+                                label = 'Weekday (Mon-Fri)';
+                                break;
+                              case ReminderFrequency.weekend:
+                                label = 'Weekend (Sat-Sun)';
+                                break;
+                            }
+                            return DropdownMenuItem<ReminderFrequency>(
+                              value: frequency,
+                              child: Text(label),
+                            );
+                          }).toList(),
+                      onChanged: (ReminderFrequency? newValue) {
+                        if (newValue != null &&
+                            newValue != _selectedFrequency) {
+                          setState(() {
+                            _selectedFrequency = newValue;
+                            _selectedDates.clear();
+                            _selectedWeekDays.fillRange(0, 7, false);
+                            final now = DateTime.now();
+                            final today = DateTime(
+                              now.year,
+                              now.month,
+                              now.day,
+                            );
+
+                            switch (newValue) {
+                              case ReminderFrequency.oneTime:
+                              case ReminderFrequency.multipleDates:
+                                _selectedDate = today;
+                                break;
+                              case ReminderFrequency.daily:
+                                _selectedDate = today;
+                                // Generate dates for the next 30 days
+                                _selectedDates.clear();
+                                for (int i = 0; i < 30; i++) {
+                                  _selectedDates.add(
+                                    today.add(Duration(days: i)),
+                                  );
+                                }
+
+                                break;
+                              case ReminderFrequency.weekday:
+                                _selectedWeekDays.fillRange(
+                                  0,
+                                  5,
+                                  true,
+                                ); // Mon-Fri
+                                _selectedDate =
+                                    now.weekday <= 5
+                                        ? today
+                                        : DateTime(
+                                          now.year,
+                                          now.month,
+                                          now.day + (8 - now.weekday),
+                                        );
+                                // Generate dates for the next 30 weekdays
+                                _selectedDates.clear();
+                                DateTime weekdayDate = _selectedDate;
+                                int weekdayCount = 0;
+                                while (weekdayCount < 30) {
+                                  if (weekdayDate.weekday <= 5) {
+                                    // Only add weekdays (Mon-Fri)
+                                    _selectedDates.add(
+                                      DateTime(
+                                        weekdayDate.year,
+                                        weekdayDate.month,
+                                        weekdayDate.day,
+                                      ),
+                                    );
+                                    weekdayCount++;
+                                  }
+                                  weekdayDate = weekdayDate.add(
+                                    const Duration(days: 1),
+                                  );
+                                }
+                                break;
+                              case ReminderFrequency.weekend:
+                                _selectedWeekDays[5] = true; // Sat
+                                _selectedWeekDays[6] = true; // Sun
+                                _selectedDate =
+                                    now.weekday >= 6
+                                        ? today
+                                        : DateTime(
+                                          now.year,
+                                          now.month,
+                                          now.day + (6 - now.weekday),
+                                        );
+                                // Generate dates for the next 30 weekends
+                                _selectedDates.clear();
+                                DateTime weekendDate = _selectedDate;
+                                int weekendCount = 0;
+                                while (weekendCount < 30) {
+                                  if (weekendDate.weekday >= 6) {
+                                    // Only add weekends (Sat-Sun)
+                                    _selectedDates.add(
+                                      DateTime(
+                                        weekendDate.year,
+                                        weekendDate.month,
+                                        weekendDate.day,
+                                      ),
+                                    );
+                                    weekendCount++;
+                                  }
+                                  weekendDate = weekendDate.add(
+                                    const Duration(days: 1),
+                                  );
+                                }
+                                break;
+                            }
+                            _datePickerController.animateToDate(_selectedDate);
+                          });
+                        }
+                      },
+                    ),
+                    const VerticalSpace(16),
+                    _buildFrequencySpecificInput(),
+                    const VerticalSpace(32),
+                    if (state.isLoading)
+                      const Center(child: CircularProgressIndicator())
+                    else if (state.error != null)
+                      Center(
+                        child: Text(
+                          state.error!,
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      )
+                    else
+                      CustomButton(
+                        title: 'Create Reminder',
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            bool isValid = true;
+                            String? errorMessage;
+
+                            // Validate _selectedDate is not in the past for oneTime
+                            final today = DateTime.now();
+                            final normalizedToday = DateTime(
+                              today.year,
+                              today.month,
+                              today.day,
+                            );
+                            if (_selectedFrequency ==
+                                    ReminderFrequency.oneTime &&
+                                _selectedDate.isBefore(normalizedToday)) {
+                              isValid = false;
+                              errorMessage =
+                                  'Selected date cannot be in the past';
+                            }
+
+                            // Validate frequency-specific inputs
+                            switch (_selectedFrequency) {
+                              case ReminderFrequency.multipleDates:
+                              case ReminderFrequency.weekday:
+                              case ReminderFrequency.weekend:
+                              case ReminderFrequency.daily:
+                                if (_selectedDates.isEmpty) {
+                                  isValid = false;
+                                  errorMessage =
+                                      'Please select at least one date';
+                                } else if (_selectedDates.any(
+                                  (date) => date.isBefore(normalizedToday),
+                                )) {
+                                  isValid = false;
+                                  errorMessage =
+                                      'Selected dates cannot be in the past';
+                                }
+                                break;
+                              default:
+                                break;
+                            }
+
+                            if (!isValid) {
+                              showToast(
+                                context,
+                                type: ToastificationType.error,
+                                title: 'Invalid Input',
+                                description: errorMessage!,
+                              );
+                              return;
+                            }
+
+                            _printReminderDetails();
+
+                            // Format dates for API
+                            String startDate =
+                                _selectedFrequency == ReminderFrequency.oneTime
+                                    ? DateFormat(
+                                      'yyyy-MM-dd',
+                                    ).format(_selectedDate)
+                                    : DateFormat(
+                                      'yyyy-MM-dd',
+                                    ).format(_selectedDates.first);
+
+                            String endDate =
+                                _selectedFrequency == ReminderFrequency.oneTime
+                                    ? DateFormat(
+                                      'yyyy-MM-dd',
+                                    ).format(_selectedDate)
+                                    : DateFormat(
+                                      'yyyy-MM-dd',
+                                    ).format(_selectedDates.last);
+
+                            // Format time for API
+                            String time =
+                                '${_selectedTime.hour.toString().padLeft(2, '0')}:${_selectedTime.minute.toString().padLeft(2, '0')}';
+
+                            // Get selected days based on frequency
+                            List<String> selectedDays = [];
+                            switch (_selectedFrequency) {
+                              case ReminderFrequency.weekday:
+                                selectedDays = [
+                                  'Monday',
+                                  'Tuesday',
+                                  'Wednesday',
+                                  'Thursday',
+                                  'Friday',
+                                ];
+                                break;
+                              case ReminderFrequency.weekend:
+                                selectedDays = ['Saturday', 'Sunday'];
+                                break;
+                              case ReminderFrequency.daily:
+                                selectedDays = [
+                                  'Monday',
+                                  'Tuesday',
+                                  'Wednesday',
+                                  'Thursday',
+                                  'Friday',
+                                  'Saturday',
+                                  'Sunday',
+                                ];
+                                break;
+                              case ReminderFrequency.multipleDates:
+                                selectedDays =
+                                    _selectedDates
+                                        .map(
+                                          (date) => _getDayName(date.weekday),
+                                        )
+                                        .toList();
+                                break;
+                              case ReminderFrequency.oneTime:
+                                selectedDays = [
+                                  _getDayName(_selectedDate.weekday),
+                                ];
+                                break;
+                            }
+
+                            final success = await state.createReminder(
+                              title: _titleController.text,
+                              description: _descriptionController.text,
+                              time: time,
+                              frequency:
+                                  _selectedFrequency.toString().split('.').last,
+                              startDate: startDate,
+                              endDate: endDate,
+                              selectedDays: selectedDays,
+                            );
+
+                            if (success) {
+                              showToast(
+                                context,
+                                type: ToastificationType.success,
+                                title: 'Reminder Created!',
+                                description:
+                                    'Reminder ${_titleController.text} created successfully',
+                              );
+                              if (mounted) {
+                                // Pop back to home and refresh
+                                context.pop();
+                                // Find the HomeState using Provider and refresh
+                                final homeState = Provider.of<HomeState>(
+                                  context,
+                                  listen: false,
+                                );
+                                await homeState.loadEvents();
+                              }
+                            } else {
+                              showToast(
+                                context,
+                                type: ToastificationType.error,
+                                title: 'Failed to Create Reminder',
+                                description:
+                                    state.error ??
+                                    'An error occurred while creating the reminder',
+                              );
+                            }
+                          }
+                        },
+                      ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

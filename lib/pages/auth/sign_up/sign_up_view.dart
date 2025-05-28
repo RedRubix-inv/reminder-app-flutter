@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:reminder_app/components/app_textfield.dart';
 import 'package:reminder_app/components/button.dart';
@@ -103,7 +104,7 @@ class _SignUpViewState extends State<SignUpView>
                       child: AppTextField(
                         hintText: "Full Name",
                         labelText: "Full Name",
-                        prefixIcon: const Icon(Icons.person_outline),
+                        prefixIcon: const Icon(LucideIcons.user2),
                         keyboardType: TextInputType.name,
                         onChanged: state.onFullNameChanged,
                         validator: validateFullName,
@@ -118,7 +119,7 @@ class _SignUpViewState extends State<SignUpView>
                       child: AppTextField(
                         hintText: "Email",
                         labelText: "Email",
-                        prefixIcon: const Icon(Icons.email_outlined),
+                        prefixIcon: const Icon(LucideIcons.mail),
                         keyboardType: TextInputType.emailAddress,
                         onChanged: state.onEmailChanged,
                         validator: validateEmail,
@@ -134,7 +135,7 @@ class _SignUpViewState extends State<SignUpView>
                         hintText: "Password",
                         labelText: "Password",
                         maxLines: 1,
-                        prefixIcon: const Icon(Icons.lock_outline),
+                        prefixIcon: const Icon(LucideIcons.lock),
                         isPassword: true,
                         onChanged: state.onPasswordChanged,
                         validator: validatePassword,
@@ -150,7 +151,7 @@ class _SignUpViewState extends State<SignUpView>
                         hintText: "Confirm Password",
                         labelText: "Confirm Password",
                         maxLines: 1,
-                        prefixIcon: const Icon(Icons.lock_outline),
+                        prefixIcon: const Icon(LucideIcons.mail),
                         isPassword: true,
                         onChanged: state.onConfirmPasswordChanged,
                         validator:
@@ -206,6 +207,39 @@ class _SignUpViewState extends State<SignUpView>
                         ),
                       ),
                     ],
+                  ),
+                  const VerticalSpace(20),
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: OutlinedButton.icon(
+                        onPressed: state.isLoading ? null : () {},
+                        // : () => state.handleGoogleSignIn(context),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          side: BorderSide(
+                            color: primaryColor.withOpacity(0.5),
+                          ),
+                        ),
+                        icon: Image.network(
+                          'https://www.google.com/favicon.ico',
+                          width: 24,
+                          height: 24,
+                        ),
+                        label: Text(
+                          'Continue with Google',
+                          style: TextStyle(
+                            color: textColor,
+                            fontFamily: "Sora",
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                   const VerticalSpace(20),
                   FadeTransition(
