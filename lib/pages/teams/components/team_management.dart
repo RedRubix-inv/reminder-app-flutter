@@ -141,6 +141,7 @@ class _TeamManagementViewState extends State<TeamManagementView> {
       appBar: CustomAppBar(
         displayMode: LeadingDisplayMode.backWithText,
         leadingText: "Team Management",
+        showNotification: false,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(

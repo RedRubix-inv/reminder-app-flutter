@@ -192,6 +192,8 @@ class ReminderDetailsView extends StatelessWidget {
       appBar: CustomAppBar(
         displayMode: LeadingDisplayMode.backWithText,
         leadingText: 'Reminder Details',
+        onNotificationPressed: () {},
+        showNotification: false,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

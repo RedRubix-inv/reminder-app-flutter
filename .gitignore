@@ -43,3 +43,11 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/android/app/build
+
+
+# Flutter platform folders to ignore (if you don't want to commit them)
+windows/
+macos/
+web/
+linux/

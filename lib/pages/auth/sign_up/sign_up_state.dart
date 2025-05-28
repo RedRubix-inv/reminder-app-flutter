@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:reminder_app/components/show_toast.dart';
+import 'package:reminder_app/services/api-service/base_http_service.dart';
+import 'package:reminder_app/services/api-service/user_service.dart';
 import 'package:reminder_app/services/auth_service.dart';
 import 'package:reminder_app/utils/router.dart';
 import 'package:toastification/toastification.dart';
 
 class SignUpState extends ChangeNotifier {
   final AuthService _authService;
+  final UserService _userService;
   final formKey = GlobalKey<FormState>();
 
-  SignUpState(this._authService) {
+  SignUpState(this._authService) : _userService = UserService() {
     // Listen to auth state changes
     _authService.authStateChanges.listen((user) {
       if (user != null) {
@@ -77,6 +80,18 @@ class SignUpState extends ChangeNotifier {
 
       // Update user profile with full name
       if (credential.user != null) {
+        // Store user data in your API
+        final response = await _userService.createUser(
+          userId: credential.user!.uid,
+          name: _fullName!.trim(),
+        );
+
+        if (response is ErrorResponse) {
+          throw Exception(
+            response.data['message'] ?? 'Failed to store user data',
+          );
+        }
+
         // Show success message
         if (context.mounted) {
           showToast(
